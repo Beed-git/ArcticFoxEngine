@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.32804.182
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcticFoxEngine", "ArcticFoxEngine\ArcticFoxEngine.csproj", "{8B7147A4-C57B-4613-9627-12DDF80B2FA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{6B4E9DE6-B063-4195-AFFB-7433F441537D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roguelike", "Roguelike\Roguelike.csproj", "{F229C7F7-2674-4178-A8CE-DA845EAD9863}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B7147A4-C57B-4613-9627-12DDF80B2FA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B7147A4-C57B-4613-9627-12DDF80B2FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B7147A4-C57B-4613-9627-12DDF80B2FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B7147A4-C57B-4613-9627-12DDF80B2FA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A8FE8E7-1153-4395-B192-9B1041C1AAEF}
+	EndGlobalSection
+EndGlobal
