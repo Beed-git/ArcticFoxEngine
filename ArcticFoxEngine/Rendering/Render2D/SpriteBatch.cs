@@ -36,7 +36,7 @@ public class SpriteBatch : ISpriteBatch, IDisposable
         _shader.Use();
     }
 
-    public int MaxSprites { get; } = 1000;
+    public int MaxSprites { get; } = 2000;
 
     public void BeginDraw(Matrix4? mvp = null)
     {
@@ -98,6 +98,10 @@ public class SpriteBatch : ISpriteBatch, IDisposable
 
     public void Dispose()
     {
+        _vbo.Dispose();
+        _ebo.Dispose();
+        _vao.Dispose();
+        _shader.Dispose();
     }
 
     private struct VertexPositionColor
