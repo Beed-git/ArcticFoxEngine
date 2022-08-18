@@ -7,12 +7,12 @@ public struct Color
     public byte b;
     public byte a;
 
-    public Color(int color)
+    public Color(uint color)
     {
-        a = (byte)((color >> 24) & 0xFF);
-        r = (byte)((color >> 16) & 0xFF);
-        g = (byte)((color >> 8) & 0xFF);
-        b = (byte)(color & 0xFF);
+        r = (byte)((color >> 24) & 0xFF);
+        g = (byte)((color >> 16) & 0xFF);
+        b = (byte)((color >> 8) & 0xFF);
+        a = (byte)(color & 0xFF);
     }
 
     public Color(byte r, byte g, byte b) : this(r, g, b, 255)
@@ -21,10 +21,10 @@ public struct Color
 
     public Color(byte r, byte g, byte b, byte a)
     {
-        this.a = a;
         this.r = r;
         this.g = g;
         this.b = b;
+        this.a = a;
     }
 
     public Color(float r, float g, float b) : this(r, g, b, 1.0f)
@@ -33,10 +33,10 @@ public struct Color
 
     public Color(float r, float g, float b, float a) : this
         (
-            (byte)(a * 255),
             (byte)(r * 255),
             (byte)(g * 255),
-            (byte)(b * 255)
+            (byte)(b * 255),
+            (byte)(a * 255)
         )
     {
     }
@@ -49,10 +49,10 @@ public struct Color
     public static int ToInt(Color color)
     {
         int i = 0;
-        i |= color.a << 24;
-        i |= color.r << 16;
-        i |= color.g << 8;
-        i |= color.b;
+        i |= color.r << 24;
+        i |= color.g << 16;
+        i |= color.b << 8;
+        i |= color.a;
         return i;
     }
 
@@ -62,7 +62,7 @@ public struct Color
     /// </summary>
     /// <param name="color"></param>
     /// <returns></returns>
-    public static Color FromInt(int color)
+    public static Color FromInt(uint color)
     {
         return new Color(color);
     }
