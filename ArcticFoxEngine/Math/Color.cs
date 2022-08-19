@@ -1,4 +1,6 @@
-﻿namespace ArcticFoxEngine.Math;
+﻿using System.Xml;
+
+namespace ArcticFoxEngine.Math;
 
 public struct Color
 {
@@ -97,4 +99,6 @@ public struct Color
 
     public static implicit operator Color(System.Drawing.Color c) => new(c.R, c.G, c.B, c.A);
     public static implicit operator System.Drawing.Color(Color c) => System.Drawing.Color.FromArgb(c.a, c.r, c.g, c.b);
+
+    public static Color White => new Color(255, 255, 255);
 }

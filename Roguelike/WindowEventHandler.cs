@@ -28,6 +28,9 @@ public class WindowEventHandler : IWindowEventHandler
     {
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         GL.ClearColor(0.2f, 0.5f, 1.0f, 1.0f);
+
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
     }
 
     public void OnUpdate(double time)

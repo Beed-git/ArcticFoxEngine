@@ -15,4 +15,13 @@
     <ProjectReference Include="..\ArcticFoxEngine\ArcticFoxEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Assets\128x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\SpriteSheet.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

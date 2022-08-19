@@ -9,28 +9,31 @@ public class SpriteBatch : ISpriteBatch, IDisposable
 {
     private int _pointer;
 
-    private readonly VertexPositionColor[] _vertices;
+    private readonly VertexPositionColorTexture[] _vertices;
     private readonly uint[] _indices;
 
     private readonly VertexArrayObject _vao;
-    private readonly BufferObject<VertexPositionColor> _vbo;
+    private readonly BufferObject<VertexPositionColorTexture> _vbo;
     private readonly BufferObject<uint> _ebo;
 
     private readonly Shader _shader;
+    private readonly ITexture2D _texture;
 
-    public SpriteBatch()
+    public SpriteBatch(ITexture2D texture)
     {
-        _vertices = new VertexPositionColor[MaxSprites * 4];
+        _texture = texture;
+        _vertices = new VertexPositionColorTexture[MaxSprites * 4];
         _indices = new uint[MaxSprites * 6];
 
-        _vao = new VertexArrayObject(7 * sizeof(float));
+        _vao = new VertexArrayObject(9 * sizeof(float));
         _vao.Bind();
 
-        _vbo = new BufferObject<VertexPositionColor>(_vertices.Length, BufferTarget.ArrayBuffer);
+        _vbo = new BufferObject<VertexPositionColorTexture>(_vertices.Length, BufferTarget.ArrayBuffer);
         _ebo = new BufferObject<uint>(_indices.Length, BufferTarget.ElementArrayBuffer);
 
         _vao.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0);
         _vao.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 3 * sizeof(float));
+        _vao.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 7 * sizeof(float));
 
         _shader = new Shader(vert, frag);
         _shader.Use();
@@ -53,27 +56,38 @@ public class SpriteBatch : ISpriteBatch, IDisposable
 
         mvp = view * projection;
         _pointer = 0;
+
         _shader.SetUniform("mvp", mvp ?? Matrix4.Identity);
     }
 
     public void DrawRectangle(Rectangle destination, Color color)
+    {
+        DrawRectangle(destination, new(0, 0, _texture.Width, _texture.Height), color);
+    }
+
+    public void DrawRectangle(Rectangle destination, Rectangle source, Color color)
     {
         if (_pointer >= MaxSprites)
         {
             throw new Exception($"Attempted to draw too many rectangles in a full spritebatch of size {MaxSprites}.");
         }
 
+        var vColor = color.ToVector4();
+
         int x1 = destination.x;
         int y1 = destination.y;
         int x2 = destination.x + destination.width;
         int y2 = destination.y + destination.height;
 
-        var vColor = color.ToVector4();
+        float tx1 = (float)source.x / _texture.Width;
+        float tx2 = tx1 + (float)source.width / _texture.Width;
+        float ty2 = (float)(_texture.Height - source.y) / _texture.Height;
+        float ty1 = ty2 - (float)source.height / _texture.Height;
 
-        _vertices[(4 * _pointer) + 0] = new VertexPositionColor(new Vector3(x1, y1, 0.0f), vColor); // Bottom-left vertex
-        _vertices[(4 * _pointer) + 1] = new VertexPositionColor(new Vector3(x2, y1, 0.0f), vColor); // Bottom-right vertex
-        _vertices[(4 * _pointer) + 2] = new VertexPositionColor(new Vector3(x1, y2, 0.0f), vColor); // Top-left vertex
-        _vertices[(4 * _pointer) + 3] = new VertexPositionColor(new Vector3(x2, y2, 0.0f), vColor); // Top-right vertex
+        _vertices[(4 * _pointer) + 0] = new VertexPositionColorTexture(new Vector3(x1, y1, 0.0f), vColor, new Vector2(tx1, ty1)); // Bottom-left vertex
+        _vertices[(4 * _pointer) + 1] = new VertexPositionColorTexture(new Vector3(x2, y1, 0.0f), vColor, new Vector2(tx2, ty1)); // Bottom-right vertex
+        _vertices[(4 * _pointer) + 2] = new VertexPositionColorTexture(new Vector3(x1, y2, 0.0f), vColor, new Vector2(tx1, ty2)); // Top-left vertex
+        _vertices[(4 * _pointer) + 3] = new VertexPositionColorTexture(new Vector3(x2, y2, 0.0f), vColor, new Vector2(tx2, ty2)); // Top-right vertex
 
         _indices[(6 * _pointer) + 0] = (uint)_pointer * 4 + 0;
         _indices[(6 * _pointer) + 1] = (uint)_pointer * 4 + 1;
@@ -91,8 +105,9 @@ public class SpriteBatch : ISpriteBatch, IDisposable
         _vbo.BufferData(_vertices);
         _ebo.BufferData(_indices);
 
-        _shader.Use();
         _vao.Bind();
+        _texture.Bind();
+        _shader.Use();
         GL.DrawElements(PrimitiveType.Triangles, _pointer * 6, DrawElementsType.UnsignedInt, 0); 
     }
 
@@ -104,20 +119,22 @@ public class SpriteBatch : ISpriteBatch, IDisposable
         _shader.Dispose();
     }
 
-    private struct VertexPositionColor
+    private struct VertexPositionColorTexture
     {
         public Vector3 position;
         public Vector4 color;
+        public Vector2 texture;
 
-        public VertexPositionColor(Vector3 position, Vector4 color)
+        public VertexPositionColorTexture(Vector3 position, Vector4 color, Vector2 texture)
         {
             this.position = position;
             this.color = color;
+            this.texture = texture;
         }
 
         public override string ToString()
         {
-            return $"({position},{color})";
+            return $"({position},{color},{texture})";
         }
     }
 
@@ -126,14 +143,17 @@ public class SpriteBatch : ISpriteBatch, IDisposable
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec4 aColor;
+layout(location = 2) in vec2 aTexCoord;
 
 out vec4 fColor;
+out vec2 fTexCoord;
 
 uniform mat4 mvp;
 
 void main(void)
 {
     fColor = aColor;
+    fTexCoord = aTexCoord;
     gl_Position = vec4(aPosition, 1.0) * mvp;
 }
 ";
@@ -142,12 +162,15 @@ void main(void)
 #version 330
 
 in vec4 fColor;
+in vec2 fTexCoord;
 
 out vec4 outputColor;
 
+uniform sampler2D texture0;
+
 void main()
 {
-    outputColor = fColor;
+    outputColor = texture(texture0, fTexCoord) * fColor;
 }
 ";
 }

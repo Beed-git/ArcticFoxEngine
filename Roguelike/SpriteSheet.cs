@@ -20,6 +20,11 @@ public class SpriteSheet
     public int SpriteHeight { get; private init; }
     public ITexture2D Texture { get; private init; }
 
+    public Rectangle GetDestination(int x, int y)
+    {
+        return new Rectangle(x * SpriteWidth, y * SpriteHeight, SpriteWidth, SpriteHeight);
+    }
+
     public Rectangle GetSource(int id)
     {
         int x = id % _spriteX;

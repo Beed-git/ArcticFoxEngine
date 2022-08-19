@@ -28,11 +28,24 @@ public class Texture2D : ITexture2D
         Bind();
         GL.TexImage2D(_target, 0, _pixelInternalFormat, Width, Height, 0, _pixelFormat, _pixelType, IntPtr.Zero);
         GLUtil.CheckError();
+
+        CreateParameters();
+    }
+
+    private static void CreateParameters()
+    {
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+
+        GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        GLUtil.CheckError();
     }
 
     public int Width { get; private init; }
     public int Height { get; private init; }
-
 
     public void Bind(TextureUnit unit = TextureUnit.Texture0)
     {
