@@ -46,6 +46,7 @@ public class Texture2D : ITexture2D
 
     public int Width { get; private init; }
     public int Height { get; private init; }
+    public Rectangle Bounds => new(0, 0, Width, Height);
 
     public void Bind(TextureUnit unit = TextureUnit.Texture0)
     {

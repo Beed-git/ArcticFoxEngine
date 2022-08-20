@@ -4,23 +4,13 @@
 /// I service which runs on the render thread.
 /// Allows for the usage of GL calls.
 /// </summary>
-public interface IRenderThreadService
+public interface IRenderService
 {
     /// <summary>
     /// Called during the window onload method.
-    /// Runs after all injections are finished.
+    /// Runs after all injections and inits are finished.
     /// </summary>
-    public void Load()
-    {
-    }
-
-    /// <summary>
-    /// Update which is called at a consistant rate.
-    /// </summary>
-    /// <param name="dt">The time taken since the last fixed update.</param>
-    public void FixedUpdate(double dt)
-    {
-    }
+    public void Load();
 
     /// <summary>
     /// Called during the window render method.

@@ -3,26 +3,36 @@ using OpenTK.Windowing.Desktop;
 
 namespace ArcticFoxEngine.Services.Window;
 
-public class Window : IWindow
+internal class Window : IWindow
 {
     private GameWindow? _window;
     private IEnumerable<IWindowEventHandler> _handlers;
-    private HashSet<IRenderThreadService> _renderThreadServices;
+    private HashSet<IRenderService> _renderServices;
+    private HashSet<IUpdateService> _updateServices;
 
     public Window(IEnumerable<IWindowEventHandler> handlers)
     {
         _handlers = handlers;
-        _renderThreadServices = new HashSet<IRenderThreadService>();
+        _renderServices = new HashSet<IRenderService>();
+        _updateServices = new HashSet<IUpdateService>();
     }
 
     public int Width => _window is null ? 0 : _window.Size.X;
     public int Height => _window is null ? 0 : _window.Size.Y;
 
-    public void AddRenderServices(IEnumerable<IRenderThreadService> renderServices)
+    public void AddRenderServices(IEnumerable<IRenderService> renderServices)
     {
         foreach (var service in renderServices)
         {
-            _renderThreadServices.Add(service);
+            _renderServices.Add(service);
+        }
+    }
+
+    public void AddUpdateServices(IEnumerable<IUpdateService> updateServices)
+    {
+        foreach (var service in updateServices)
+        {
+            _updateServices.Add(service);
         }
     }
 
@@ -48,10 +58,14 @@ public class Window : IWindow
         };
 
         _window = new GameWindow(gameWindowSettings, nativeWindowSettings);
-        foreach (var service in _renderThreadServices)
+        foreach (var service in _renderServices)
         {
             _window.Load += service.Load;
-            _window.UpdateFrame += (e) => service.FixedUpdate(e.Time);
+        }
+
+        foreach (var service in _updateServices)
+        {
+            _window.UpdateFrame += (e) => service.Update(e.Time);
         }
 
         foreach (var handler in _handlers)
@@ -73,7 +87,7 @@ public class Window : IWindow
         {
             handler.OnRender(e.Time);
         }
-        foreach (var service in _renderThreadServices)
+        foreach (var service in _renderServices)
         {
             service.Render(e.Time);
         }

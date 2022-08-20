@@ -1,5 +1,4 @@
 ﻿using ArcticFoxEngine;
-using ArcticFoxEngine.Services.Game;
 using ArcticFoxEngine.Services.TextureManager;
 using ArcticFoxEngine.Services.Window;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +19,6 @@ var serviceCollection = new ServiceCollection()
         });
     })
     .AddWindow<WindowEventHandler>()
-    .AddGameManager()
     .AddTextureManager()
     .AddSingleton<Renderer>()
 ;
