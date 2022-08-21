@@ -3,19 +3,22 @@ using ArcticFoxEngine.Rendering;
 using ArcticFoxEngine.Rendering.Camera;
 using ArcticFoxEngine.Rendering.Render2D;
 using ArcticFoxEngine.Services;
+using ArcticFoxEngine.Services.GraphicsManager;
 using ArcticFoxEngine.Services.TextureManager;
 using OpenTK.Mathematics;
 
 namespace Roguelike;
 
-public class Renderer : IRenderService
+public class Renderer : IInitService, IRenderService
 {
     private const int _spriteCount = 7000;
 
     private SpriteBatch _spriteBatch;
+    private SpriteBatch _spriteBatch2;
     private SpriteSheet _spriteSheet;
     private Random _random;
 
+    private readonly IGraphicsManager _graphicsManager;
     private readonly ITextureManager _textureManager;
     private ITexture2D _texture;
     private ITexture2D _texture2;
@@ -26,14 +29,16 @@ public class Renderer : IRenderService
 
     private Camera2D _camera;
 
-    public Renderer(ITextureManager textureManager)
+    public Renderer(ITextureManager textureManager, IGraphicsManager graphicsManager)
     {
         _textureManager = textureManager;
+        _graphicsManager = graphicsManager;
     }
 
-    public void Load()
+    public void Init()
     {
         _camera = new Camera2D();
+        _graphicsManager.OnResize += (s, e) => _camera.UpdateAspectRatio(e.x, e.y);
 
         _texture = _textureManager.LoadTexture("Assets/SpriteSheet.png");
         _texture2 = _textureManager.LoadTexture("Assets/128x.png");
@@ -41,6 +46,7 @@ public class Renderer : IRenderService
         _spriteSheet = new SpriteSheet(16, 16, _texture);
 
         _spriteBatch = new SpriteBatch();
+        _spriteBatch2 = new SpriteBatch();
         _random = new Random();
 
         _dests = new Rectangle[_spriteCount];
@@ -69,12 +75,17 @@ public class Renderer : IRenderService
         }
     }
 
+    double t = 0;
+
     public void Render(double dt)
     {
         var pos = _camera.Position;
-        _camera.Position = new Vector2(pos.X - (float)(16 * dt), pos.Y);
+        t += dt;
+        double cx = Math.Sin(t) * 100;
+        double cy = Math.Cos(t) * 100;
+        _camera.Position = new Vector2((float)cx, (float)cy);
 
-        _spriteBatch.BeginDraw(_camera.ViewMatrix * _camera.ProjectionMatrix);
+        _spriteBatch.BeginDraw(_camera);
         for (int i = 0; i < _spriteCount; i++)
         {
             _spriteBatch.DrawRectangle(_texture2, _dests[i], _sources[i], _colors[i]);
@@ -96,6 +107,13 @@ public class Renderer : IRenderService
         src = _spriteSheet.GetSource(2);
         _spriteBatch.DrawRectangle(_texture, dst, src, Color.White);
 
+        _spriteBatch.EndDraw();
+
+        _spriteBatch.BeginDraw(Matrix4.Identity);
+        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
+        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
+        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
+        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
         _spriteBatch.EndDraw();
     }
 }

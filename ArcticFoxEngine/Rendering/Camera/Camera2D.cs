@@ -10,13 +10,14 @@ public class Camera2D : ICamera
     private Vector3 _front = new Vector3(0.0f, 0.0f, -1.0f);
     private Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
 
+    private readonly int _size;
     private int _width;
     private int _height;
 
     public Camera2D()
     {
-        _width = 512;
-        _height = (int)(_width * 1080.0f / 1920.0f);
+        _size = 512;
+        UpdateAspectRatio(_size, _size);
     }
 
     public Vector2 Position { get; set; }
@@ -25,6 +26,8 @@ public class Camera2D : ICamera
 
     public void UpdateAspectRatio(int width, int height)
     {
-        throw new NotImplementedException();
+        float aspectRatio = width / (float)height;
+        _width = (int)(_size * aspectRatio);
+        _height = _size;
     }
 }

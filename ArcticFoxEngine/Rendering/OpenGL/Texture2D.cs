@@ -25,7 +25,7 @@ public class Texture2D : ITexture2D
         _handle = GL.GenTexture();
         GLUtil.CheckError();
 
-        Bind();
+        Use();
         GL.TexImage2D(_target, 0, _pixelInternalFormat, Width, Height, 0, _pixelFormat, _pixelType, IntPtr.Zero);
         GLUtil.CheckError();
 
@@ -48,7 +48,7 @@ public class Texture2D : ITexture2D
     public int Height { get; private init; }
     public Rectangle Bounds => new(0, 0, Width, Height);
 
-    public void Bind(TextureUnit unit = TextureUnit.Texture0)
+    public void Use(TextureUnit unit = TextureUnit.Texture0)
     {
         GL.ActiveTexture(unit);
         GLUtil.CheckError();

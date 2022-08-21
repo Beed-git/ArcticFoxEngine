@@ -7,12 +7,6 @@
 public interface IRenderService
 {
     /// <summary>
-    /// Called during the window onload method.
-    /// Runs after all injections and inits are finished.
-    /// </summary>
-    public void Load();
-
-    /// <summary>
     /// Called during the window render method.
     /// </summary>
     /// <param name="dt">The time taken since the last render call.</param>

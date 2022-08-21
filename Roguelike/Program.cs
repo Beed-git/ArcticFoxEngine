@@ -1,6 +1,6 @@
 ﻿using ArcticFoxEngine;
+using ArcticFoxEngine.Services.GraphicsManager;
 using ArcticFoxEngine.Services.TextureManager;
-using ArcticFoxEngine.Services.Window;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
@@ -18,7 +18,7 @@ var serviceCollection = new ServiceCollection()
             options.UseUtcTimestamp = false;
         });
     })
-    .AddWindow<WindowEventHandler>()
+    .AddGraphicsManager()
     .AddTextureManager()
     .AddSingleton<Renderer>()
 ;

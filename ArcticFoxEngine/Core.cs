@@ -1,42 +1,58 @@
 ﻿using ArcticFoxEngine.Services;
-using ArcticFoxEngine.Services.Window;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace ArcticFoxEngine;
 
 public class Core : IDisposable
 {
     private ServiceProvider _provider;
+    private ILogger<Core>? _logger;
+
+    private IEnumerable<IInitService> _initServices;
+    private IEnumerable<IUpdateService> _updateServices;
+    private IEnumerable<IRenderService> _renderServices;
 
     public Core(IServiceCollection services)
     {
         var serviceManager = new ServiceProviderBuilder(services);
 
         // Get all services.
-        var initServices = serviceManager.GetServices<IInitService>();
-        var updateServices = serviceManager.GetServices<IUpdateService>();
-        var renderServices = serviceManager.GetServices<IRenderService>();
-
-        // Initialise services.
-        foreach (var service in initServices)
-        {
-            service.Init();
-        }
+        _initServices = serviceManager.GetServices<IInitService>();
+        _updateServices = serviceManager.GetServices<IUpdateService>();
+        _renderServices = serviceManager.GetServices<IRenderService>();
 
         _provider = serviceManager.Build();
-
-        var window = _provider.GetService<IWindow>();
-        window?.AddUpdateServices(updateServices);
-        window?.AddRenderServices(renderServices);
+        _logger = _provider.GetService<ILogger<Core>>();
     }
 
     public void Run()
     {
-        var window = _provider.GetService<IWindow>();
-        window?.Run();
+        var window = _provider.GetService<GameWindow>();
+        if (window is not null)
+        {
+            var eventHandler = new CoreWindowEventHandler(_initServices, _updateServices, _renderServices);
+
+            window.Load += eventHandler.OnLoad;
+            window.Unload += eventHandler.OnUnload;
+            window.UpdateFrame += (e) => eventHandler.OnUpdate(e.Time);
+            window.RenderFrame += (e) => eventHandler.OnRender(e.Time);
+            window.Resize += (e) => eventHandler.OnResize(new(e.Width, e.Height));
+            window.KeyDown += eventHandler.OnKeyDown;
+            window.KeyUp += eventHandler.OnKeyUp;
+
+            window.Run();
+        }
+        else
+        {
+            _logger?.LogWarning("No window attached, engine cannot currently be run from core without a window.");
+        }
     }
+
+
 
     public void Dispose()
     {

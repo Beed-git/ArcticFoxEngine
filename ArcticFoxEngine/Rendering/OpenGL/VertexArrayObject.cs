@@ -14,7 +14,7 @@ public class VertexArrayObject : IDisposable
         GLUtil.CheckError();
     }
 
-    public void Bind()
+    public void Use()
     {
         GL.BindVertexArray(_handle);
         GLUtil.CheckError();

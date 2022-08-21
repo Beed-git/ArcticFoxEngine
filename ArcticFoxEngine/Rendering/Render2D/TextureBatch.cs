@@ -16,18 +16,16 @@ public class TextureBatch : ITextureBatch, IDisposable
     private readonly BufferObject<VertexPositionColorTexture> _vbo;
     private readonly BufferObject<uint> _ebo;
 
-    private readonly Shader _shader;
-    private readonly ITexture2D _texture;
+    private ITexture2D _texture;
 
-    public TextureBatch(ITexture2D texture, int maxSprites = 2000)
+    public TextureBatch(int maxSprites = 2000)
     {
         MaxSprites = maxSprites;
-        _texture = texture;
         _vertices = new VertexPositionColorTexture[MaxSprites * 4];
         _indices = new uint[MaxSprites * 6];
 
         _vao = new VertexArrayObject(9 * sizeof(float));
-        _vao.Bind();
+        _vao.Use();
 
         _vbo = new BufferObject<VertexPositionColorTexture>(_vertices.Length, BufferTarget.ArrayBuffer);
         _ebo = new BufferObject<uint>(_indices.Length, BufferTarget.ElementArrayBuffer);
@@ -35,23 +33,20 @@ public class TextureBatch : ITextureBatch, IDisposable
         _vao.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0);
         _vao.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 3 * sizeof(float));
         _vao.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 7 * sizeof(float));
-
-        _shader = new Shader(vert, frag);
-        _shader.Use();
     }
 
     public bool Drawing { get; private set; }
     public int MaxSprites { get; private init; }
 
-    public void BeginDraw(Matrix4? mvp = null)
+    public void BeginDraw(ITexture2D texture)
     {
         if (Drawing)
         {
             throw new InvalidOperationException("TextureBatch is already drawing, can't call TextureBatch.BeginDraw() while drawing.");
         }
         Drawing = true;
+        _texture = texture;
         _pointer = 0;
-        _shader.SetUniform("mvp", mvp ?? Matrix4.Identity);
     }
 
     public void DrawRectangle(Rectangle destination, Rectangle source, Color color)
@@ -93,19 +88,21 @@ public class TextureBatch : ITextureBatch, IDisposable
         _pointer++;
     }
 
-    public void EndDraw()
+    public void EndDraw(Shader shader, Matrix4 mvp)
     {
         if (!Drawing)
         {
             throw new InvalidOperationException("TextureBatch isn't drawing, can't call TextureBatch.EndDraw() while not drawing.");
         }
         Drawing = false;
+        shader.SetUniform("mvp", mvp);
+
         _vbo.BufferData(_vertices);
         _ebo.BufferData(_indices);
 
-        _vao.Bind();
-        _texture.Bind();
-        _shader.Use();
+        _vao.Use();
+        _texture.Use();
+        shader.Use();
         GL.DrawElements(PrimitiveType.Triangles, _pointer * 6, DrawElementsType.UnsignedInt, 0); 
     }
 
@@ -114,7 +111,6 @@ public class TextureBatch : ITextureBatch, IDisposable
         _vbo.Dispose();
         _ebo.Dispose();
         _vao.Dispose();
-        _shader.Dispose();
     }
 
     private struct VertexPositionColorTexture
@@ -135,40 +131,4 @@ public class TextureBatch : ITextureBatch, IDisposable
             return $"({position},{color},{texture})";
         }
     }
-
-    private const string vert = @"
-#version 330 core
-
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec4 aColor;
-layout(location = 2) in vec2 aTexCoord;
-
-out vec4 fColor;
-out vec2 fTexCoord;
-
-uniform mat4 mvp;
-
-void main(void)
-{
-    fColor = aColor;
-    fTexCoord = aTexCoord;
-    gl_Position = vec4(aPosition, 1.0) * mvp;
-}
-";
-
-    private const string frag = @"
-#version 330
-
-in vec4 fColor;
-in vec2 fTexCoord;
-
-out vec4 outputColor;
-
-uniform sampler2D texture0;
-
-void main()
-{
-    outputColor = texture(texture0, fTexCoord) * fColor;
-}
-";
 }
