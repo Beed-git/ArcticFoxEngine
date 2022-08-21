@@ -15,8 +15,8 @@ public struct Rectangle
         this.height = height;
     }
 
-    public Vector2i XY => new Vector2i(x, y);
-    public Vector2i WH => new Vector2i(width, height);
+    public Point XY => new(x, y);
+    public Point WH => new(width, height);
 
     public override bool Equals(object? obj)
     {

@@ -8,15 +8,18 @@ namespace ArcticFoxEngine;
 
 internal class CoreWindowEventHandler : IWindowEventHandler
 {
+    private readonly GameWindow _window;
     private readonly IEnumerable<IInitService> _initServices;
     private readonly IEnumerable<IUpdateService> _updateServices;
     private readonly IEnumerable<IRenderService> _renderServices;
 
     public CoreWindowEventHandler(
+        GameWindow window,
         IEnumerable<IInitService> initServices,
         IEnumerable<IUpdateService> updateServices,
         IEnumerable<IRenderService> renderServices
     ) {
+        _window = window;
         _initServices = initServices;
         _updateServices = updateServices;
         _renderServices = renderServices;

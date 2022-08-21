@@ -1,20 +1,18 @@
 ﻿using ArcticFoxEngine.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace ArcticFoxEngine;
 
 public class Core : IDisposable
 {
-    private ServiceProvider _provider;
-    private ILogger<Core>? _logger;
+    private readonly ServiceProvider _provider;
+    private readonly ILogger<Core>? _logger;
 
-    private IEnumerable<IInitService> _initServices;
-    private IEnumerable<IUpdateService> _updateServices;
-    private IEnumerable<IRenderService> _renderServices;
+    private readonly IEnumerable<IInitService> _initServices;
+    private readonly IEnumerable<IUpdateService> _updateServices;
+    private readonly IEnumerable<IRenderService> _renderServices;
 
     public Core(IServiceCollection services)
     {
@@ -34,7 +32,7 @@ public class Core : IDisposable
         var window = _provider.GetService<GameWindow>();
         if (window is not null)
         {
-            var eventHandler = new CoreWindowEventHandler(_initServices, _updateServices, _renderServices);
+            var eventHandler = new CoreWindowEventHandler(window, _initServices, _updateServices, _renderServices);
 
             window.Load += eventHandler.OnLoad;
             window.Unload += eventHandler.OnUnload;
@@ -51,8 +49,6 @@ public class Core : IDisposable
             _logger?.LogWarning("No window attached, engine cannot currently be run from core without a window.");
         }
     }
-
-
 
     public void Dispose()
     {
