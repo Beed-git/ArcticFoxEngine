@@ -1,7 +1,6 @@
 ﻿using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering.OpenGL;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 
 namespace ArcticFoxEngine.Rendering.Render2D;
 
@@ -88,7 +87,7 @@ public class TextureBatch : ITextureBatch, IDisposable
         _pointer++;
     }
 
-    public void EndDraw(Shader shader, Matrix4 mvp)
+    public void EndDraw(Shader shader, Matrix4x4 mvp)
     {
         if (!Drawing)
         {

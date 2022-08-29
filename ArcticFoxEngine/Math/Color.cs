@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Math;
 
-public struct Color
+public partial struct Color
 {
     public byte r;
     public byte g;
@@ -33,13 +33,11 @@ public struct Color
     {
     }
 
-    public Color(float r, float g, float b, float a) : this
-        (
-            (byte)(r * 255),
-            (byte)(g * 255),
-            (byte)(b * 255),
-            (byte)(a * 255)
-        )
+    public Color(float r, float g, float b, float a) : this ((byte)(r * 255), (byte)(g * 255), (byte)(b * 255), (byte)(a * 255))
+    {
+    }
+
+    public Color(Vector4 vec) : this(vec.x, vec.y, vec.z, vec.w)
     {
     }
 
@@ -56,17 +54,6 @@ public struct Color
         i |= color.b << 8;
         i |= color.a;
         return i;
-    }
-
-    /// <summary>
-    /// Converts an integer to a color.
-    /// Integers are expected to be argb format.
-    /// </summary>
-    /// <param name="color"></param>
-    /// <returns></returns>
-    public static Color FromInt(uint color)
-    {
-        return new Color(color);
     }
 
     public override bool Equals(object? obj)
@@ -99,6 +86,4 @@ public struct Color
 
     public static implicit operator Color(System.Drawing.Color c) => new(c.R, c.G, c.B, c.A);
     public static implicit operator System.Drawing.Color(Color c) => System.Drawing.Color.FromArgb(c.a, c.r, c.g, c.b);
-
-    public static Color White => new Color(255, 255, 255);
 }

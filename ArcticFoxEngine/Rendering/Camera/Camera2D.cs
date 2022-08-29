@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+﻿using ArcticFoxEngine.Math;
 
 namespace ArcticFoxEngine.Rendering.Camera;
 
@@ -21,8 +21,8 @@ public class Camera2D : ICamera
     }
 
     public Vector2 Position { get; set; }
-    public Matrix4 ViewMatrix => Matrix4.LookAt(new Vector3(Position.X, Position.Y, 20.0f), new Vector3(Position) + _front, _up);
-    public Matrix4 ProjectionMatrix => Matrix4.CreateOrthographic(_width, _height, _nearPlane, _farPlane);
+    public Matrix4x4 ViewMatrix => Matrix4x4.LookAt(new Vector3(Position, 20.0f), new Vector3(Position) + _front, _up);
+    public Matrix4x4 ProjectionMatrix => Matrix4x4.CreateOrthographic(_width, _height, _nearPlane, _farPlane);
 
     public void UpdateAspectRatio(int width, int height)
     {

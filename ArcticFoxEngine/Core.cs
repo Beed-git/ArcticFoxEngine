@@ -1,7 +1,6 @@
 ﻿using ArcticFoxEngine.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTK.Windowing.Desktop;
 
 namespace ArcticFoxEngine;
 

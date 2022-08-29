@@ -1,22 +1,33 @@
 ﻿using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering.Camera;
 using ArcticFoxEngine.Rendering.OpenGL;
-using OpenTK.Mathematics;
+using ArcticFoxEngine.Services.GraphicsManager;
 
 namespace ArcticFoxEngine.Rendering.Render2D;
 
 public class SpriteBatch : ISpriteBatch
 {
+    private const float NEAR_PLANE = 0.01f;
+    private const float FAR_PLANE = 100.0f;
+
     private const int _maxSprites = 2000;
-    private Matrix4 _mvp;
+    private Matrix4x4 _projection;
+    private Matrix4x4 _mvp;
 
     private readonly Shader _shader;
     private readonly Dictionary<ITexture2D, Batch> _batchs;
     private Queue<BatchLifetime> _batchPool;
 
-    public SpriteBatch()
+    private readonly IGraphicsManager _graphicsManager;
+        
+    public SpriteBatch(IGraphicsManager graphicsManager)
     {
-        _mvp = Matrix4.Identity;
+        _graphicsManager = graphicsManager;
+
+        _mvp = Matrix4x4.Identity;
+        _projection = Matrix4x4.CreateOrthographic(graphicsManager.Width, graphicsManager.Height, NEAR_PLANE, FAR_PLANE);
+        graphicsManager.OnResize += OnResize;
+
         _shader = new Shader(vert, frag);
         _batchs = new Dictionary<ITexture2D, Batch>();
         _batchPool = new Queue<BatchLifetime>();
@@ -24,22 +35,33 @@ public class SpriteBatch : ISpriteBatch
         TextureBatchLifetime = 4;
     }
 
+    private void OnResize(object? sender, Point e)
+    {
+        _projection = Matrix4x4.CreateOrthographic(e.x, e.y, NEAR_PLANE, FAR_PLANE);
+    }
+
     public bool Drawing { get; private set; }
     public int TextureBatchLifetime { get; set; }
 
-    public void BeginDraw(Matrix4 mvp)
+    private void BeginDraw()
     {
         if (Drawing)
         {
             throw new InvalidOperationException("Spritebatch is already drawing, can't call SpriteBatch.BeginDraw() while drawing.");
         }
         Drawing = true;
-        _mvp = mvp;
+    }
+
+    public void BeginDraw(Matrix4x4 view)
+    {
+        _mvp = view * _projection;
+        BeginDraw();
     }
 
     public void BeginDraw(ICamera camera)
     {
-        BeginDraw(camera.ViewMatrix * camera.ProjectionMatrix);
+        _mvp = camera.ViewMatrix * camera.ProjectionMatrix;
+        BeginDraw();
     }
 
     public void DrawRectangle(ITexture2D texture, Rectangle destination, Rectangle source, Color color)

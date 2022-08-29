@@ -5,7 +5,6 @@ using ArcticFoxEngine.Rendering.Render2D;
 using ArcticFoxEngine.Services;
 using ArcticFoxEngine.Services.GraphicsManager;
 using ArcticFoxEngine.Services.TextureManager;
-using OpenTK.Mathematics;
 
 namespace Roguelike;
 
@@ -14,7 +13,6 @@ public class Renderer : IInitService, IRenderService
     private const int _spriteCount = 7000;
 
     private SpriteBatch _spriteBatch;
-    private SpriteBatch _spriteBatch2;
     private SpriteSheet _spriteSheet;
     private Random _random;
 
@@ -28,6 +26,7 @@ public class Renderer : IInitService, IRenderService
     private Color[] _colors;
 
     private Camera2D _camera;
+    private Camera2D _viewportCamera;
 
     public Renderer(ITextureManager textureManager, IGraphicsManager graphicsManager)
     {
@@ -38,15 +37,20 @@ public class Renderer : IInitService, IRenderService
     public void Init()
     {
         _camera = new Camera2D();
+        _viewportCamera = new Camera2D();
+
         _graphicsManager.OnResize += (s, e) => _camera.UpdateAspectRatio(e.x, e.y);
+        _graphicsManager.OnResize += (s, e) =>
+        {
+            _viewportCamera.UpdateAspectRatio(e.x, e.y);
+        };
 
         _texture = _textureManager.LoadTexture("Assets/SpriteSheet.png");
         _texture2 = _textureManager.LoadTexture("Assets/128x.png");
 
         _spriteSheet = new SpriteSheet(16, 16, _texture);
 
-        _spriteBatch = new SpriteBatch();
-        _spriteBatch2 = new SpriteBatch();
+        _spriteBatch = new SpriteBatch(_graphicsManager);
         _random = new Random();
 
         _dests = new Rectangle[_spriteCount];
@@ -79,7 +83,6 @@ public class Renderer : IInitService, IRenderService
 
     public void Render(double dt)
     {
-        var pos = _camera.Position;
         t += dt;
         double cx = Math.Sin(t) * 100;
         double cy = Math.Cos(t) * 100;
@@ -109,10 +112,9 @@ public class Renderer : IInitService, IRenderService
 
         _spriteBatch.EndDraw();
 
-        _spriteBatch.BeginDraw(Matrix4.Identity);
-        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
-        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
-        _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
+        dst = new Rectangle(0, 0, 512, 512);
+        src = _texture2.Bounds;
+        _spriteBatch.BeginDraw(_viewportCamera);
         _spriteBatch.DrawRectangle(_texture2, dst, src, Color.White);
         _spriteBatch.EndDraw();
     }
