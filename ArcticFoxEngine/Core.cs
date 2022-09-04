@@ -1,56 +1,79 @@
-﻿using ArcticFoxEngine.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using ArcticFoxEngine.EC;
+using System.Diagnostics;
 
 namespace ArcticFoxEngine;
 
 public class Core : IDisposable
 {
-    private readonly ServiceProvider _provider;
-    private readonly ILogger<Core>? _logger;
+    private readonly Stopwatch _updateWatch;
+    private readonly Stopwatch _fixedUpdateWatch;
+    private readonly Stopwatch _renderWatch;
 
-    private readonly IEnumerable<IInitService> _initServices;
-    private readonly IEnumerable<IUpdateService> _updateServices;
-    private readonly IEnumerable<IRenderService> _renderServices;
+    private readonly double _fixedUpdateFrequency;
+    private readonly double _renderFrequency;
 
-    public Core(IServiceCollection services)
+    private readonly SceneManager _sceneManager;
+
+    public Core()
     {
-        var serviceManager = new ServiceProviderBuilder(services);
+        _updateWatch = new Stopwatch();
+        _fixedUpdateWatch = new Stopwatch();
+        _renderWatch = new Stopwatch();
 
-        // Get all services.
-        _initServices = serviceManager.GetServices<IInitService>();
-        _updateServices = serviceManager.GetServices<IUpdateService>();
-        _renderServices = serviceManager.GetServices<IRenderService>();
+        _fixedUpdateFrequency = 1.0f / 60;
+        _renderFrequency = 1.0f / 60;
 
-        _provider = serviceManager.Build();
-        _logger = _provider.GetService<ILogger<Core>>();
+        _sceneManager = new SceneManager();
     }
+
+    public bool Running { get; set; }
 
     public void Run()
     {
-        var window = _provider.GetService<GameWindow>();
-        if (window is not null)
+        Running = true;
+
+        _updateWatch.Start();
+        _fixedUpdateWatch.Start();
+        _renderWatch.Start();
+
+        while (Running)
         {
-            var eventHandler = new CoreWindowEventHandler(window, _initServices, _updateServices, _renderServices);
-
-            window.Load += eventHandler.OnLoad;
-            window.Unload += eventHandler.OnUnload;
-            window.UpdateFrame += (e) => eventHandler.OnUpdate(e.Time);
-            window.RenderFrame += (e) => eventHandler.OnRender(e.Time);
-            window.Resize += (e) => eventHandler.OnResize(new(e.Width, e.Height));
-            window.KeyDown += eventHandler.OnKeyDown;
-            window.KeyUp += eventHandler.OnKeyUp;
-
-            window.Run();
+            Update();
+            FixedUpdate();
+            Render();
         }
-        else
+
+    }
+
+    private void Update()
+    {
+        var dt = _updateWatch.Elapsed.TotalSeconds;
+        _updateWatch.Restart();
+        _sceneManager.Update(dt);
+    }
+
+    private void FixedUpdate()
+    {
+        var dt = _fixedUpdateWatch.Elapsed.TotalSeconds;
+
+        if (_fixedUpdateWatch.Elapsed.TotalSeconds > _fixedUpdateFrequency)
         {
-            _logger?.LogWarning("No window attached, engine cannot currently be run from core without a window.");
+            _fixedUpdateWatch.Restart();
+            _sceneManager.FixedUpdate(dt);
+        }
+    }
+    
+    private void Render()
+    {
+        var dt = _renderWatch.Elapsed.TotalSeconds;
+
+        if (_renderWatch.Elapsed.TotalSeconds > _renderFrequency)
+        {
+            _renderWatch.Restart();
         }
     }
 
     public void Dispose()
     {
-        _provider.Dispose();
     }
 }

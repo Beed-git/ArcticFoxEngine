@@ -1,6 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
-
-namespace ArcticFoxEngine.Math;
+﻿namespace ArcticFoxEngine.Math;
 
 /// <summary>
 /// Represents a 4x4 matrix of floats. Matrices are row-major.

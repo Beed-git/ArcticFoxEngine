@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArcticFoxEngine", "ArcticFo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{6B4E9DE6-B063-4195-AFFB-7433F441537D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Roguelike", "Roguelike\Roguelike.csproj", "{F229C7F7-2674-4178-A8CE-DA845EAD9863}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F229C7F7-2674-4178-A8CE-DA845EAD9863}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
