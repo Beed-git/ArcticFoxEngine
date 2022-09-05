@@ -8,7 +8,7 @@ public struct WindowSettings
     public Vector2i Size { get; set; }
 
     public static WindowSettings Default => new WindowSettings()
-    {
+    { 
         Title = "ArcticFox Engine",
         Size = new Vector2i(800, 600),
     };

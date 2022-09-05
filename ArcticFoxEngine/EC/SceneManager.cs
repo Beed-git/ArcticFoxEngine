@@ -18,9 +18,4 @@ public class SceneManager
     {
         _currentScene?.Update(dt);
     }
-
-    public void FixedUpdate(double dt)
-    {
-        _currentScene?.FixedUpdate(dt);
-    }
 }

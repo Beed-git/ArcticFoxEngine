@@ -34,17 +34,6 @@ public class Scene
         }
     }
 
-    public void FixedUpdate(double dt)
-    {
-        foreach (var ent in _entityManager.GetEntities())
-        {
-            foreach (var script in ent.Scripts)
-            {
-                script.OnFixedUpdate(dt);
-            }
-        }
-    }
-
     public Entity CreateEntity()
     {
         var ent = _entityManager.CreateEntity();

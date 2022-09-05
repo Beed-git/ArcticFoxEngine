@@ -1,4 +1,4 @@
-﻿using ArcticFoxEngine;
+﻿using ArcticFoxEngine.Rendering;
 
-using var core = new Core();
-core.Run();
+using var window = new Window(WindowSettings.Default);
+window.Run();
