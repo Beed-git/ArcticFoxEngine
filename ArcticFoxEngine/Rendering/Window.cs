@@ -5,26 +5,27 @@ using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using SilkWindow = Silk.NET.Windowing.Window;
 using ImGuiNET;
-using Silk.NET.Vulkan;
-using ArcticFoxEngine.Rendering.OpenGL;
+using ArcticFoxEngine.Math;
+using ArcticFoxEngine.Rendering.Textures;
+using ArcticFoxEngine.Rendering.Sprites;
 
 namespace ArcticFoxEngine.Rendering;
 
 public class Window : IDisposable
 {
     private readonly IWindow _window;
-    private readonly Core _core;
+    private Core? _core;
 
     private GL _gl;
+    private GraphicsDevice? _graphicsDevice;
+
     private ImGuiController _imGuiController;
     private IInputContext _inputContext;
 
-    private  RenderTarget _target;
+    private RenderTarget _target;
 
     public Window(WindowSettings settings)
     {
-        _core = new Core();
-
         var options = WindowOptions.Default;
         options.Title = settings.Title;
         options.Size = new Vector2D<int>(settings.Size.x, settings.Size.y);
@@ -59,19 +60,25 @@ public class Window : IDisposable
 
     private void OnLoad()
     {
-        _gl = _window.CreateOpenGL();
+        var gameSize = new Vector2i(800, 600);
 
-        _target = new RenderTarget(_gl, 800, 600);
+        _gl = _window.CreateOpenGL();
+        _graphicsDevice = new GraphicsDevice(_gl);
+
+        _target = new RenderTarget(_graphicsDevice, (uint)gameSize.x, (uint)gameSize.y);
 
         _inputContext = _window.CreateInput();
 
         _imGuiController = new ImGuiController(_gl, _window, _inputContext, ConfigureImgui);
+
+        _core = new Core(_graphicsDevice);
         _core.OnLoad();
+        _core.OnResize(gameSize);
     }
 
     private void OnUpdate(double dt)
     {
-        _core.OnUpdate(dt);
+        _core?.OnUpdate(dt);
 
         _imGuiController.Update((float)dt);
     }
@@ -81,28 +88,34 @@ public class Window : IDisposable
         _gl.ClearColor(System.Drawing.Color.CornflowerBlue);
         _gl.Clear(ClearBufferMask.ColorBufferBit);
 
+        ImGui.DockSpaceOverViewport();
+
+        ImGui.Begin("Properties");
+
+        ImGui.Text("[Entity]");
+        ImGui.Text("Entity name");
+        ImGui.NewLine();
+
+        ImGui.Text("[Components]");
+        // ImGuiExtensions.DragInt2("Transform", ref i);
+        ImGui.End();
+
         ImGui.Begin("Game");
         ImGui.BeginChild("GLContext");
 
-        // Bind the render target and draw the scene to the target.
+        ImGui.ShowDemoWindow();
+
+        // Draw the game to the render target.
         _target.Bind();
-
-        _gl.ClearColor(System.Drawing.Color.Red);
-        _gl.Clear(ClearBufferMask.ColorBufferBit);
-
-        _core.OnRender(dt);
-
+        _core?.OnRender(dt);
         _target.Unbind();
 
         // Draw render target on imgui image.
         var size = ImGui.GetWindowSize();
-        ImGui.Image((IntPtr)_target.FBO, size, new(0, 1), new(1, 0));
+        ImGui.Image((IntPtr)_target.TextureHandle, size, new(0, 1), new(1, 0));
 
         ImGui.EndChild();
         ImGui.End();
-
-        ImGui.ShowDemoWindow();
-        ImGui.ShowAboutWindow();
 
         _imGuiController.Render();
     }
@@ -110,11 +123,13 @@ public class Window : IDisposable
     private void OnResize(Vector2D<int> size)
     {
         _gl.Viewport(size);
-        _core.OnResize(new Math.Vector2i(size.X, size.Y));
+        //_core?.OnResize(new Vector2i(size.X, size.Y));
     }
 
     private void OnClose()
     {
+        _core?.OnClose();
+
         _imGuiController?.Dispose();
         _inputContext?.Dispose();
 

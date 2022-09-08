@@ -171,4 +171,8 @@ public struct Vector3
     {
         return Remainder(vector, scale);
     }
+
+
+    public static implicit operator System.Numerics.Vector3(Vector3 vector) => new(vector.x, vector.y, vector.z);
+    public static implicit operator Vector3(System.Numerics.Vector3 vector) => new(vector.X, vector.Y, vector.Z);
 }

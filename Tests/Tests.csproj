@@ -19,4 +19,8 @@
     <ProjectReference Include="..\ArcticFoxEngine\ArcticFoxEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Math\" />
+  </ItemGroup>
+
 </Project>

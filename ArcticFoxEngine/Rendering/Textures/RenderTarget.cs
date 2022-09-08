@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace ArcticFoxEngine.Rendering.OpenGL;
+namespace ArcticFoxEngine.Rendering.Textures;
 
 public class RenderTarget : IDisposable
 {
@@ -13,25 +13,25 @@ public class RenderTarget : IDisposable
     private uint _texture;
     private uint _depthBuffer;
 
-    private int[] _previousViewport;
+    private int[] _previousViewportSize;
 
-    public RenderTarget(GL context, uint width, uint height)
+    public RenderTarget(GraphicsDevice graphicsDevice, uint width, uint height)
     {
-        _gl = context;
+        _gl = graphicsDevice.GL;
 
         _width = width;
         _height = height;
 
-        _previousViewport = new int[4];
+        _previousViewportSize = new int[4];
 
-        CreateBuffers();
+        Resize(width, height);
     }
 
-    public uint FBO => _fbo;
+    public uint TextureHandle => _texture;
 
-    private void CreateBuffers()
+    public void Resize(uint width, uint height)
     {
-        // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/#creating-the-render-target
+        Dispose();
 
         // Create fbo.
         _fbo = _gl.GenFramebuffer();
@@ -40,7 +40,7 @@ public class RenderTarget : IDisposable
         // Create texture.
         _texture = _gl.GenTexture();
         _gl.BindTexture(TextureTarget.Texture2D, _texture);
-        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, _width, _height, 0, GLEnum.Rgb, GLEnum.UnsignedByte, ReadOnlySpan<byte>.Empty);
+        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, _width, _height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, ReadOnlySpan<byte>.Empty);
         _gl.TexParameterI(TextureTarget.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Nearest);
         _gl.TexParameterI(TextureTarget.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Nearest);
 
@@ -49,13 +49,21 @@ public class RenderTarget : IDisposable
         _gl.BindRenderbuffer(RenderbufferTarget.Renderbuffer, _depthBuffer);
         _gl.RenderbufferStorage(RenderbufferTarget.Renderbuffer, GLEnum.DepthComponent, _width, _height);
         _gl.FramebufferRenderbuffer(GLEnum.Framebuffer, GLEnum.DepthAttachment, GLEnum.Renderbuffer, _depthBuffer);
+
+        // Configure fbo.
         _gl.FramebufferTexture(GLEnum.Framebuffer, GLEnum.ColorAttachment0, _texture, 0);
         _gl.DrawBuffer(GLEnum.ColorAttachment0);
+
+        if (_gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
+        {
+            var status = _gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            throw new Exception($"Something went wrong when creating the framebuffer!\n{status}");
+        }
     }
 
     public void Bind()
     {
-        _gl.GetInteger(GetPName.Viewport, _previousViewport);
+        _gl.GetInteger(GetPName.Viewport, _previousViewportSize);
 
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, _fbo);
         _gl.Viewport(0, 0, _width, _height);
@@ -63,8 +71,8 @@ public class RenderTarget : IDisposable
 
     public void Unbind()
     {
-        _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
-        _gl.Viewport(_previousViewport[0], _previousViewport[1], (uint)_previousViewport[2], (uint)_previousViewport[3]);
+        _gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        _gl.Viewport(_previousViewportSize[0], _previousViewportSize[1], (uint)_previousViewportSize[2], (uint)_previousViewportSize[3]);
     }
 
     public void Dispose()

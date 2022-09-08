@@ -1,5 +1,7 @@
 ﻿namespace ArcticFoxEngine.Math;
 
+using SM = Silk.NET.Maths;
+
 /// <summary>
 /// Represents a 4x4 matrix of floats. Matrices are row-major.
 /// </summary>
@@ -75,24 +77,27 @@ public struct Matrix4x4
 
     public static Matrix4x4 CreateOrthographicOffCenter(float left, float right, float bottom, float top, float depthNear, float depthFar)
     {
-        var inverseLR = 1.0f / (right - left);
-        var inverseTB = 1.0f / (top - bottom);
-        var inverseNF = 1.0f / (depthFar - depthNear);
-
-        var row0 = new Vector4(2 * inverseLR, 0, 0, 0);
-        var row1 = new Vector4(0, 2 * inverseTB, 0, 0);
-        var row2 = new Vector4(0, 0, -2 * inverseNF, 0);
-
-        var row3x = -(right + left) * inverseLR;
-        var row3y = -(bottom + top) * inverseTB;
-        var row3z = -(left + right) * inverseNF;
-        var row3 = new Vector4(row3x, row3y, row3z, 1);
-
-        return new Matrix4x4(row0, row1, row2, row3);
+        // For now we'll borrow the function from silk.
+        SM.Matrix4X4<float> ortho = SM.Matrix4X4.CreateOrthographicOffCenter(left, right, bottom, top, depthNear, depthFar);
+        return FromSilkMatrix(ortho);
     }
 
-    public static Matrix4x4 CreatePerspective()
+    private static Matrix4x4 FromSilkMatrix(SM.Matrix4X4<float> mat)
     {
-        throw new NotImplementedException("CreatePerspective not yet implemented.");
+        return new Matrix4x4(
+            FromSilkVector4(mat.Row1),
+            FromSilkVector4(mat.Row2),
+            FromSilkVector4(mat.Row3),
+            FromSilkVector4(mat.Row4));
+    }
+
+    private static Vector4 FromSilkVector4(SM.Vector4D<float> vec)
+    {
+        return new Vector4(vec.X, vec.Y, vec.Z, vec.W);
+    }
+
+    public override string ToString()
+    {
+        return $"{row0}\n{row1}\n{row2}\n{row3}";
     }
 }
