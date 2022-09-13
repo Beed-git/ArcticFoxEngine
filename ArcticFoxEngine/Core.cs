@@ -18,7 +18,6 @@ public class Core
     private readonly ILogger _logger;
 
     private SpriteBatch _spriteBatch;
-    private Texture2D _texture;
 
     private Sprite _testSprite;
     private Sprite _testSprite2;
@@ -45,15 +44,11 @@ public class Core
             .WithLoader(new TextureLoader(_graphicsDevice))
             .Build();
 
-        // Tests for resource manager.
-        var t = _resourceManager.GetResource<Texture2D>("128x.png");
-        var t2 = _resourceManager.GetResource<Texture2D>("128x.png");
-        var a = _resourceManager.GetResource<Camera2D>("camera");
-
+        
         int size = 16;
         float stride = 256.0f / size;
 
-        _texture = new Texture2D(_graphicsDevice, (uint)size, (uint)size);
+        var texture = new Texture2D(_graphicsDevice, (uint)size, (uint)size);
         byte[] data = new byte[size * size * 4];
         for (int r = 0; r < size; r++) 
         {
@@ -66,12 +61,16 @@ public class Core
                 data[key + 3] = byte.MaxValue;
             }
         }
-        _texture.SetData(_texture.Bounds, data);
+        texture.SetData(texture.Bounds, data);
+
+        // Need to dispose.
+        var t1 = _resourceManager.CreateResource("test", texture);
+        var t2 = _resourceManager.GetResource<Texture2D>("128x.png");
 
         _spriteBatch = new SpriteBatch(_graphicsDevice);
 
-        _testSprite = new Sprite(_texture);
-        _testSprite2 = new Sprite(_texture, _texture.Bounds, Color.Red);
+        _testSprite = new Sprite(t1.Data);
+        _testSprite2 = new Sprite(t2.Data);
     }
 
     public void OnUpdate(double dt)
@@ -93,7 +92,6 @@ public class Core
     public void OnClose()
     {
         _spriteBatch.Dispose();
-        _texture.Dispose();
     }
 
     public void OnResize(Vector2i size)
