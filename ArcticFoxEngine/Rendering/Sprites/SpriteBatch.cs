@@ -10,7 +10,7 @@ public class SpriteBatch : IDisposable
     private ICamera _camera;
     private readonly GraphicsDevice _graphicsDevice;
 
-    private Dictionary<Texture2D, TextureBatch> _textureBatchs;
+    private readonly Dictionary<Texture2D, TextureBatch> _textureBatchs;
     private readonly Shader _shader;
 
     public SpriteBatch(GraphicsDevice graphicsDevice)
@@ -48,10 +48,13 @@ public class SpriteBatch : IDisposable
         _shader.SetUniform("uProjection", _camera.ProjectionMatrix);
         _shader.SetUniform("uTexture", 0);
 
-        // TODO: Dispose of unused batchs.
         foreach (var batch in _textureBatchs.Values)
         {
             batch.EndDraw();
+            if (!batch.HasSprites)
+            {
+                batch.Dispose();
+            }
         }
     }
 

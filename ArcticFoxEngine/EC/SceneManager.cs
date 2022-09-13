@@ -8,6 +8,8 @@ public class SceneManager
     {
     }
 
+    public Scene? CurrentScene => _currentScene;
+
     public void ChangeScene(Scene scene)
     {
         _currentScene = scene;

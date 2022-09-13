@@ -42,6 +42,8 @@ internal class TextureBatch : IDisposable
         _vao.Unbind();
     }
 
+    public bool HasSprites => _pointer > 0;
+
     public void BeginDraw()
     {
         _pointer = 0;

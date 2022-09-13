@@ -1,10 +1,9 @@
 ﻿using ArcticFoxEngine.Logging;
-using ArcticFoxEngine.Rendering.Resources;
 using System.Reflection;
 
 namespace ArcticFoxEngine.Rendering.Resources;
 
-public class ResourceManager
+public class ResourceManager : IDisposable
 {
     private const string _assetFolder = "assets";
 
@@ -96,5 +95,13 @@ public class ResourceManager
             _stores.Add(type, storage);
         }
         return storage;
+    }
+
+    public void Dispose()
+    {
+        foreach (var store in _stores.Values)
+        {
+            store.Dispose();
+        }
     }
 }

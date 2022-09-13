@@ -2,11 +2,11 @@
 
 namespace ArcticFoxEngine.Rendering.Resources;
 
-public interface IResourceStore
+public interface IResourceStore : IDisposable
 {
 }
 
-public class ResourceStore<T> : IResourceStore where T : class
+public class ResourceStore<T> : IResourceStore, IDisposable where T : class
 {
     private readonly string _rootPath;
     private readonly ILogger _logger;
@@ -58,6 +58,20 @@ public class ResourceStore<T> : IResourceStore where T : class
         else
         {
             _logger.Log($"Attempting to delete not-existant resource at path {path}.");
+        }
+    }
+
+    public void Dispose()
+    {
+        if (typeof(T).IsAssignableTo(typeof(IDisposable)))
+        {
+            foreach (var resource in _resources.Values)
+            {
+                if (resource.Data is not null)
+                {
+                    ((IDisposable)resource.Data).Dispose();
+                }
+            }
         }
     }
 }

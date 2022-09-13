@@ -1,4 +1,5 @@
-﻿using ArcticFoxEngine.EC;
+﻿using ArcticFoxEngine.Components;
+using ArcticFoxEngine.EC;
 using ArcticFoxEngine.Logging;
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
@@ -38,7 +39,10 @@ public class Core
     {
         _camera = new Camera2D();
 
-        _sceneManager.ChangeScene(new Scene());
+        var scene = new Scene();
+        var entity = scene.CreateEntity();
+        entity.AddComponent(new TransformComponent() { X = 40, Y = 20 });
+        _sceneManager.ChangeScene(scene);
 
         _resourceManager = new ResourceManagerBuilder(_logger)
             .WithLoader(new TextureLoader(_graphicsDevice))
@@ -63,8 +67,7 @@ public class Core
         }
         texture.SetData(texture.Bounds, data);
 
-        // Need to dispose.
-        var t1 = _resourceManager.CreateResource("test", texture);
+        var t1 = _resourceManager.CreateResource("test//@", texture);
         var t2 = _resourceManager.GetResource<Texture2D>("128x.png");
 
         _spriteBatch = new SpriteBatch(_graphicsDevice);
@@ -83,15 +86,29 @@ public class Core
         _graphicsDevice.GL.ClearColor(System.Drawing.Color.SteelBlue);
         _graphicsDevice.GL.Clear(ClearBufferMask.ColorBufferBit);
 
+        //_spriteBatch.BeginDraw(_camera);
+        //_spriteBatch.DrawSprite(_testSprite, new Rectangle(0, 0, 100, 100));
+        //_spriteBatch.DrawSprite(_testSprite2, new Rectangle(10, 50, 100, 100));
+        //_spriteBatch.EndDraw();
+
         _spriteBatch.BeginDraw(_camera);
-        _spriteBatch.DrawSprite(_testSprite, new Rectangle(0, 0, 100, 100));
-        _spriteBatch.DrawSprite(_testSprite2, new Rectangle(10, 50, 100, 100));
+        if (_sceneManager.CurrentScene is Scene scene)
+        {
+            foreach (var ent in scene.Entities)
+            {
+                if (ent.TryGetComponent<TransformComponent>(out var transform))
+                {
+                    _spriteBatch.DrawSprite(_testSprite2, new Rectangle(transform.X, transform.Y, 32, 32));
+                }
+            }
+        }
         _spriteBatch.EndDraw();
     }
 
     public void OnClose()
     {
         _spriteBatch.Dispose();
+        _resourceManager.Dispose();
     }
 
     public void OnResize(Vector2i size)
