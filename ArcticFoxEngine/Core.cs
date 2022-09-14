@@ -86,22 +86,11 @@ public class Core
         _graphicsDevice.GL.ClearColor(System.Drawing.Color.SteelBlue);
         _graphicsDevice.GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        //_spriteBatch.BeginDraw(_camera);
-        //_spriteBatch.DrawSprite(_testSprite, new Rectangle(0, 0, 100, 100));
-        //_spriteBatch.DrawSprite(_testSprite2, new Rectangle(10, 50, 100, 100));
-        //_spriteBatch.EndDraw();
-
         _spriteBatch.BeginDraw(_camera);
-        if (_sceneManager.CurrentScene is Scene scene)
-        {
-            foreach (var ent in scene.Entities)
-            {
-                if (ent.TryGetComponent<TransformComponent>(out var transform))
-                {
-                    _spriteBatch.DrawSprite(_testSprite2, new Rectangle(transform.X, transform.Y, 32, 32));
-                }
-            }
-        }
+        _spriteBatch.DrawSprite(_testSprite, new Rectangle(0, 0, 200, 200));
+        _spriteBatch.DrawSprite(_testSprite2, new Rectangle(10, 50, 200, 200));
+        _spriteBatch.EndDraw();
+
         _spriteBatch.EndDraw();
     }
 

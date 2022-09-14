@@ -11,8 +11,6 @@ public class Scene
         _started = false;
     }
 
-    public IEnumerable<Entity> Entities => _entityManager.GetEntities();
-
     public void Start()
     {
         _started = true;

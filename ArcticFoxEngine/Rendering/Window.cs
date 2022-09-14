@@ -24,6 +24,8 @@ public class Window : IDisposable
 
     private RenderTarget _target;
 
+    private System.Numerics.Vector2 _lastImguiImageSize;
+
     public Window(WindowSettings settings)
     {
         var options = WindowOptions.Default;
@@ -60,12 +62,12 @@ public class Window : IDisposable
 
     private void OnLoad()
     {
-        var gameSize = new Vector2i(800, 600);
+        _lastImguiImageSize = new Vector2(800, 600);
 
         _gl = _window.CreateOpenGL();
         _graphicsDevice = new GraphicsDevice(_gl);
 
-        _target = new RenderTarget(_graphicsDevice, (uint)gameSize.x, (uint)gameSize.y);
+        _target = new RenderTarget(_graphicsDevice, (uint)_lastImguiImageSize.X, (uint)_lastImguiImageSize.Y);
 
         _inputContext = _window.CreateInput();
 
@@ -73,7 +75,7 @@ public class Window : IDisposable
 
         _core = new Core(_graphicsDevice);
         _core.OnLoad();
-        _core.OnResize(gameSize);
+        _core.OnResize(new Vector2i((int)_lastImguiImageSize.X, (int)_lastImguiImageSize.Y));
     }
 
     private void OnUpdate(double dt)
@@ -112,6 +114,13 @@ public class Window : IDisposable
 
         // Draw render target on imgui image.
         var size = ImGui.GetWindowSize();
+        if (size != _lastImguiImageSize)
+        {
+            var s = new Vector2i((int)size.X, (int)size.Y);
+            _target.Resize((uint)s.x, (uint)s.y);
+            _core?.OnResize(s);
+        }
+        _lastImguiImageSize = size;
         ImGui.Image((IntPtr)_target.TextureHandle, size, new(0, 1), new(1, 0));
 
         ImGui.EndChild();
