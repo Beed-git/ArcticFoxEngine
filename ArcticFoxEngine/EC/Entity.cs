@@ -18,7 +18,6 @@ public class Entity : IEntity
 
         _components = new List<Component>();
         _scripts = new List<BaseScript>();
-
     }
 
     public string Name { get; set; }
@@ -28,15 +27,18 @@ public class Entity : IEntity
 
     // Components
 
-    public void AddComponent<T>() where T : Component, new()
+    public T? AddComponent<T>() where T : Component
     {
-        var component = Activator.CreateInstance<T>();
-        _components.Add(component);
-    }
-
-    public void AddComponent<T>(T value) where T : Component
-    {
-        _components.Add(value);
+        var component = Activator.CreateInstance(typeof(T), this);
+        if (component is T t)
+        {
+            _components.Add(t);
+            return t;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public bool HasComponent<T>() where T : Component
@@ -63,7 +65,7 @@ public class Entity : IEntity
         return null;
     }
 
-    public bool TryGetComponent<T>(out T? value) where T : Component
+    public bool TryGetComponent<T>(out T value) where T : Component
     {
         foreach (var component in _components)
         {
@@ -73,7 +75,7 @@ public class Entity : IEntity
                 return true;
             }
         }
-        value = null;
+        value = default;
         return false;
     }
 

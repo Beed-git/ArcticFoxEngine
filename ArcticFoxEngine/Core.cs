@@ -5,7 +5,6 @@ using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
 using ArcticFoxEngine.Rendering.Camera;
 using ArcticFoxEngine.Rendering.Resources;
-using ArcticFoxEngine.Rendering.Sprites;
 using ArcticFoxEngine.Rendering.Textures;
 using Silk.NET.OpenGL;
 
@@ -18,14 +17,7 @@ public class Core
 
     private readonly ILogger _logger;
 
-    private SpriteBatch _spriteBatch;
-
-    private Sprite _testSprite;
-    private Sprite _testSprite2;
-
     private ResourceManager _resourceManager;
-
-    private ICamera _camera;
 
     public Core(GraphicsDevice graphics)
     {
@@ -37,43 +29,35 @@ public class Core
 
     public void OnLoad()
     {
-        _camera = new Camera2D();
-
-        var scene = new Scene();
-        var entity = scene.CreateEntity();
-        entity.AddComponent(new TransformComponent() { X = 40, Y = 20 });
-        _sceneManager.ChangeScene(scene);
-
         _resourceManager = new ResourceManagerBuilder(_logger)
             .WithLoader(new TextureLoader(_graphicsDevice))
             .Build();
 
+        var scene = new Scene(_graphicsDevice, _resourceManager);
+        scene.MainCamera = new Camera2D();
+
+        var player = scene.CreateEntity("player");
         
-        int size = 16;
-        float stride = 256.0f / size;
+        var plyTransform = player.AddComponent<TransformComponent>();
+        plyTransform.Position = new Vector3(10, 10, 0);
 
-        var texture = new Texture2D(_graphicsDevice, (uint)size, (uint)size);
-        byte[] data = new byte[size * size * 4];
-        for (int r = 0; r < size; r++) 
-        {
-            for (int b = 0; b < size; b++) 
-            {
-                int key = (r * size + b) * 4;
-                data[key + 0] = (byte)(r * stride);
-                data[key + 1] = 0;
-                data[key + 2] = (byte)(b * stride);
-                data[key + 3] = byte.MaxValue;
-            }
-        }
-        texture.SetData(texture.Bounds, data);
+        var plySprite = player.AddComponent<SpriteComponent>();
+        plySprite.Size = new Vector2i(100, 100);
+        plySprite.Texture = "128x.png";
 
-        var t1 = _resourceManager.CreateResource("test//@", texture);
-        var t2 = _resourceManager.GetResource<Texture2D>("128x.png");
+        var plyScript = player.AddComponent<ScriptComponent>();
+        plyScript.Script = "TestScript.cs";
 
-        _spriteBatch = new SpriteBatch(_graphicsDevice);
+        var enemy = scene.CreateEntity("enemy");
 
-        _testSprite = new Sprite(t1.Data);
-        _testSprite2 = new Sprite(t2.Data);
+        var eTransform = enemy.AddComponent<TransformComponent>();
+        eTransform.Position = new Vector3(-100, 10, 0);
+
+        var eSprite = enemy.AddComponent<SpriteComponent>();
+        eSprite.Size = new Vector2i(100, 100);
+        eSprite.TextureRegion = new Rectangle(96, 96, 32, 32);
+        eSprite.Texture = "128x.png";
+        _sceneManager.ChangeScene(scene);
     }
 
     public void OnUpdate(double dt)
@@ -86,22 +70,16 @@ public class Core
         _graphicsDevice.GL.ClearColor(System.Drawing.Color.SteelBlue);
         _graphicsDevice.GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        _spriteBatch.BeginDraw(_camera);
-        _spriteBatch.DrawSprite(_testSprite, new Rectangle(0, 0, 200, 200));
-        _spriteBatch.DrawSprite(_testSprite2, new Rectangle(10, 50, 200, 200));
-        _spriteBatch.EndDraw();
-
-        _spriteBatch.EndDraw();
+        _sceneManager.Render(dt);
     }
 
     public void OnClose()
     {
-        _spriteBatch.Dispose();
         _resourceManager.Dispose();
     }
 
     public void OnResize(Vector2i size)
     {
-        _camera.UpdateAspectRatio(size);
+        _sceneManager?.CurrentScene?.MainCamera.UpdateAspectRatio(size);
     }
 }

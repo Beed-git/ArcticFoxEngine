@@ -17,6 +17,7 @@ public struct Rectangle
 
     public Point XY => new(x, y);
     public Point WH => new(width, height);
+    public static Rectangle Zero => new(0, 0, 0, 0);
 
     public override bool Equals(object? obj)
     {
@@ -35,5 +36,15 @@ public struct Rectangle
     public override string ToString()
     {
         return $"(x:{x},y:{y},w:{width},h:{height})";
+    }
+
+    public static bool operator ==(Rectangle left, Rectangle right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Rectangle left, Rectangle right)
+    {
+        return !(left == right);
     }
 }

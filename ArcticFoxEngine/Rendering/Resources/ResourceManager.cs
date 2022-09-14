@@ -28,9 +28,7 @@ public class ResourceManager : IDisposable
             Directory.CreateDirectory(_rootPath);
         }
 
-#if DEBUG
         _logger.Log($"Asset directory is {_rootPath}");
-#endif
 
         _stores = new Dictionary<Type, IResourceStore>();
         foreach (var (type, loader) in builder.Loaders)

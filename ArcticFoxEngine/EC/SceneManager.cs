@@ -20,4 +20,9 @@ public class SceneManager
     {
         _currentScene?.Update(dt);
     }
+
+    public void Render(double dt)
+    {
+        _currentScene?.Render(dt);
+    }
 }

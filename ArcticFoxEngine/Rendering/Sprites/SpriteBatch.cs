@@ -18,10 +18,18 @@ public class SpriteBatch : IDisposable
         _graphicsDevice = graphicsDevice;
         _textureBatchs = new Dictionary<Texture2D, TextureBatch>();
         _shader = new Shader(graphicsDevice.GL, _vert, _frag);
+        Drawing = false;
     }
+
+    public bool Drawing { get; private set; }
 
     public void BeginDraw(ICamera camera)
     {
+        if (Drawing)
+        {
+            throw new Exception("Attempted to start draw while spritebatch was already drawing.");
+        }
+        Drawing = true;
         _camera = camera;
         foreach (var batch in _textureBatchs.Values)
         {
@@ -31,6 +39,11 @@ public class SpriteBatch : IDisposable
 
     public void DrawSprite(Sprite sprite, Rectangle position)
     {
+        if (!Drawing)
+        {
+            throw new Exception("Attempted to draw while spritebatch was not drawing.");
+        }
+
         if (!_textureBatchs.TryGetValue(sprite.Texture, out var batch))
         {
             batch = new TextureBatch(_graphicsDevice, sprite.Texture);
@@ -43,6 +56,11 @@ public class SpriteBatch : IDisposable
 
     public void EndDraw()
     {
+        if (!Drawing)
+        {
+            throw new Exception("Attempted to enddraw while spritebatch was not drawing.");
+        }
+        Drawing = false;
         _shader.Use();
         _shader.SetUniform("uView", _camera.ViewMatrix);
         _shader.SetUniform("uProjection", _camera.ProjectionMatrix);

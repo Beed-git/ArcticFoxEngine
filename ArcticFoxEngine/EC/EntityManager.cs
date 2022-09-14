@@ -29,6 +29,13 @@ public class EntityManager
         return ent;
     }
 
+    public Entity CreateEntity(string name)
+    {
+        var ent = new Entity(GetId(), name);
+        _entities.Add(ent);
+        return ent;
+    }
+
     public IEnumerable<Entity> CreateEntities(int amount)
     {
         var list = new List<Entity>();

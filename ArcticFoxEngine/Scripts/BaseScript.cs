@@ -18,8 +18,4 @@ public abstract class BaseScript
     public virtual void OnUpdate(double dt)
     {
     }
-
-    public virtual void OnFixedUpdate(double dt)
-    {
-    }
 }
