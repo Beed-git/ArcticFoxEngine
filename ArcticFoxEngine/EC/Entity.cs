@@ -4,8 +4,8 @@ namespace ArcticFoxEngine.EC;
 
 public class Entity : IEntity
 {
-    private readonly List<Component> _components;
-    private readonly List<BaseScript> _scripts;
+    private readonly HashSet<Component> _components;
+    private readonly HashSet<BaseScript> _scripts;
 
     public Entity(int id) : this(id, $"Entity {id}")
     {
@@ -16,8 +16,8 @@ public class Entity : IEntity
         Id = id;
         Name = name;
 
-        _components = new List<Component>();
-        _scripts = new List<BaseScript>();
+        _components = new HashSet<Component>();
+        _scripts = new HashSet<BaseScript>();
     }
 
     public string Name { get; set; }
@@ -99,41 +99,24 @@ public class Entity : IEntity
 
     public void RemoveComponents<T>() where T : Component
     {
-        for (int i = _components.Count - 1; i > 0; i--)
-        {
-            if (_components[i].GetType() == typeof(T))
-            {
-                _components.RemoveAt(i);
-            }
-        }
+        _components.RemoveWhere(c => c is T);
     }
 
     // Scripts
-
-    public void AttachScript<T>() where T : BaseScript
+    public void AddScript(BaseScript script) 
     {
-        var script = (T?)Activator.CreateInstance(typeof(T), this);
-        if (script is not null)
+        if (!_scripts.Contains(script))
         {
+            _scripts.Add(script);
             if (Started)
             {
                 script.OnCreate();
             }
-            _scripts.Add(script);
-        }
-        else
-        {
-            throw new Exception($"Failed to instantiate script of type '{typeof(T).Name}'");
         }
     }
 
-    public void DetachScripts<T>() where T : BaseScript
+    public void RemoveScript(BaseScript script)
     {
-        _scripts.RemoveAll(t => t.GetType() == typeof(T));
-    }
-
-    public void DetachScript<T>(T value) where T : BaseScript
-    {
-        _scripts.Remove(value);
+        _scripts.Remove(script);
     }
 }

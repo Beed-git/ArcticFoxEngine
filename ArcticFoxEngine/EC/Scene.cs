@@ -5,7 +5,6 @@ using ArcticFoxEngine.Rendering.Camera;
 using ArcticFoxEngine.Rendering.Resources;
 using ArcticFoxEngine.Rendering.Sprites;
 using ArcticFoxEngine.Rendering.Textures;
-using ArcticFoxEngine.Scripts;
 
 namespace ArcticFoxEngine.EC;
 
@@ -36,12 +35,9 @@ public class Scene
         _started = true;
         foreach (var ent in _entityManager.GetEntities())
         {
-            var scripts = ent.GetComponents<ScriptComponent>();
-            foreach (var script in scripts)
+            foreach (var script in ent.Scripts)
             {
-                // What happens if two classes share a script?
-                var s = _resourceManager.GetResource<BaseScript>(script.Script);
-                s.Data.OnCreate();
+                script.OnCreate();
             }
         }
     }
@@ -72,7 +68,7 @@ public class Scene
                 {
                     var region = sprite.TextureRegion == Rectangle.Zero ? texture.Data.Bounds : sprite.TextureRegion;
                     var s = new Sprite(texture.Data, region, sprite.Color);
-                    var position = new Rectangle((int)transform.Position.x, (int)transform.Position.y, sprite.Size.x, sprite.Size.y);
+                    var position = new Rectangle((int)transform.Position.x - sprite.Size.x / 2, (int)transform.Position.y - sprite.Size.y / 2, sprite.Size.x, sprite.Size.y);
                     _spriteBatch.DrawSprite(s, position);
                 }
             }

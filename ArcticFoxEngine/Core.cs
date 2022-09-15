@@ -5,7 +5,7 @@ using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
 using ArcticFoxEngine.Rendering.Camera;
 using ArcticFoxEngine.Rendering.Resources;
-using ArcticFoxEngine.Rendering.Textures;
+using ArcticFoxEngine.Scripts;
 using Silk.NET.OpenGL;
 
 namespace ArcticFoxEngine;
@@ -31,6 +31,7 @@ public class Core
     {
         _resourceManager = new ResourceManagerBuilder(_logger)
             .WithLoader(new TextureLoader(_graphicsDevice))
+            .WithLoader(new ScriptFactoryLoader(_logger))
             .Build();
 
         var scene = new Scene(_graphicsDevice, _resourceManager);
@@ -39,19 +40,22 @@ public class Core
         var player = scene.CreateEntity("player");
         
         var plyTransform = player.AddComponent<TransformComponent>();
-        plyTransform.Position = new Vector3(10, 10, 0);
+        plyTransform.Position = new Vector3(600, 10, 0);
 
         var plySprite = player.AddComponent<SpriteComponent>();
-        plySprite.Size = new Vector2i(100, 100);
+        plySprite.Size = new Vector2i(40, 300);
         plySprite.Texture = "128x.png";
 
-        var plyScript = player.AddComponent<ScriptComponent>();
-        plyScript.Script = "TestScript.cs";
+        var plyScript = _resourceManager.GetResource<ScriptFactory>("TestScript.cs");
+        if (plyScript.Data is not null)
+        {
+            player.AddScript(plyScript.Data.CreateScript(player));
+        }
 
         var enemy = scene.CreateEntity("enemy");
 
         var eTransform = enemy.AddComponent<TransformComponent>();
-        eTransform.Position = new Vector3(-100, 10, 0);
+        eTransform.Position = new Vector3(0, 0, 0);
 
         var eSprite = enemy.AddComponent<SpriteComponent>();
         eSprite.Size = new Vector2i(100, 100);
