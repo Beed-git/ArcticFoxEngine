@@ -2,25 +2,52 @@
 
 public class KeyValueLexer
 {
-    public IEnumerable<(LexType, string)> Lex(IEnumerable<(TokenType, string)> tokens)
+    public KeyValueLexer()
+    {
+        StrictArrays = true;
+    }
+
+    public IEnumerable<(LexType, string)> Lex(IEnumerable<(TokenType type, string value)> tokens)
     {
         var lexed = new List<(LexType, string)>();
 
+        TokenType lastToken = TokenType.Key;
+        LexType lastLex = LexType.Unknown;
+
+        (LexType, string) lex;
         foreach (var token in tokens)
         {
-            switch (token.Item1)
-            {
-                case TokenType.Directive: lexed.Add((LexType.Directive, token.Item2)); break;
-                case TokenType.Key: lexed.Add((LexType.Key, token.Item2)); break;
-                case TokenType.ComplexStart: lexed.Add((LexType.ComplexStart, token.Item2)); break;
-                case TokenType.ComplexEnd: lexed.Add((LexType.ComplexEnd, token.Item2)); break;
 
-                case TokenType.Value: lexed.Add(LexValueToken(token.Item2)); break;
+            if (token.type == TokenType.Value)
+            {
+                lex = LexValueToken(token.value);
+                if (StrictArrays && lastToken == TokenType.Value &&
+                    lastLex != lex.Item1)
+                {
+                    throw new Exception($"Array mixed types {lastLex} and {lex.Item1}");
+                }
             }
+            else
+            {
+                lex = token.type switch
+                {
+                    TokenType.Directive => (LexType.Directive, token.value),
+                    TokenType.Key => (LexType.Key, token.value),
+                    TokenType.ComplexStart => (LexType.ComplexStart, token.value),
+                    TokenType.ComplexEnd => (LexType.ComplexEnd, token.value),
+                    _ => (LexType.Unknown, token.value)
+                };
+            }
+
+            lastToken = token.type;
+            lastLex = lex.Item1;
+            lexed.Add(lex);
         }
 
         return lexed;
     }
+
+    public bool StrictArrays { get; set; }
 
     private static (LexType, string) LexValueToken(string value)
     {

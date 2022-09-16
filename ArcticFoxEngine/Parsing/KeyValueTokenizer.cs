@@ -76,15 +76,7 @@ public class KeyValueTokenizer
                 return;
             }
 
-            string value;
-            if (PeekChar() == '\"')
-            {
-                value = ConsumeString();
-            }
-            else
-            {
-                value = ConsumeWord(false);
-            }
+            var value = ConsumeStringOrWord();
             _kvp.Add((TokenType.Value, value));
         }
         else throw new Exception($"No value exists after '{key}='");
@@ -105,6 +97,10 @@ public class KeyValueTokenizer
         {
             ConsumeWhitespace();
 
+            if (!CanRead)
+            {
+                throw new Exception("Failed to find complex end!");
+            }
             if (PeekChar() == '}')
             {
                 break;
@@ -135,12 +131,22 @@ public class KeyValueTokenizer
         {
             ConsumeWhitespace();
 
+            if (!CanRead)
+            {
+                throw new Exception("Failed to find array end!");
+            }
+
             if (PeekChar() is ')' or ']')
             {
                 break;
             }
 
-            var value = ConsumeWord(true);
+            if (PeekChar() is ',')
+            {
+                ConsumeChar();
+            }
+
+            var value = ConsumeStringOrWord();
             _kvp.Add((TokenType.Value, value));
         }
 
@@ -152,6 +158,18 @@ public class KeyValueTokenizer
         else if (start == '[' && end == '(')
         {
             throw new Exception("Array which starts with '[' cannot end with ')");
+        }
+    }
+
+    private string ConsumeStringOrWord()
+    {
+        if (PeekChar() == '\"')
+        {
+            return ConsumeString();
+        }
+        else
+        {
+            return ConsumeWord(false);
         }
     }
 
@@ -255,6 +273,6 @@ public class KeyValueTokenizer
 
     private static bool IsEndCharacter(char ch)
     {
-        return ch == '}' || ch == ']' || ch == ')';
+        return ch == '}' || ch == ']' || ch == ')' || ch == ',';
     }
 }
