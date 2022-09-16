@@ -1,0 +1,214 @@
+﻿using System.Text;
+
+namespace ArcticFoxEngine.Parsing;
+
+public class KeyValueTokenizer
+{
+    private string _text;
+    private int _pointer;
+
+    private readonly List<(TokenType, string)> _kvp;
+
+    private bool CanRead => _pointer < _text.Length;
+
+    public KeyValueTokenizer()
+    {
+        _text = string.Empty;
+        _pointer = 0;
+
+        _kvp = new();
+    }
+
+    public IEnumerable<(TokenType, string)> Parse(string text)
+    {
+        _text = text;
+        _pointer = 0;
+
+        _kvp.Clear();
+
+        while (CanRead)
+        {
+            ConsumeWhitespace();
+
+            if (CanRead)
+            {
+                if (PeekChar() == '@')
+                {
+                    ConsumeChar();
+                    var directive = ConsumeWord(true);
+                    _kvp.Add((TokenType.Directive, directive));
+                    continue;
+                }
+
+                ConsumeKeyValue();
+            }
+        }
+
+        return _kvp;
+    }
+
+    private void ConsumeKeyValue()
+    {
+        var key = ConsumeWord(true);
+        _kvp.Add((TokenType.Key, key));
+
+        ConsumeWhitespace();
+
+        if (ConsumeChar() != '=')
+        {
+            throw new Exception("Expected = sign.");
+        }
+
+        ConsumeWhitespace();
+
+        if (CanRead)
+        {
+            if (PeekChar() == '{')
+            {
+                ConsumeComplex();
+                return;
+            }
+
+            string value;
+            if (PeekChar() == '\"')
+            {
+                value = ConsumeString();
+            }
+            else
+            {
+                value = ConsumeWord(false);
+            }
+            _kvp.Add((TokenType.Value, value));
+        }
+        else throw new Exception($"No value exists after '{key}='");
+    }
+
+    private void ConsumeComplex()
+    {
+        ConsumeWhitespace();
+
+        var start = ConsumeChar();
+        if (start != '{')
+        {
+            throw new Exception("Failed to find complex beginning!");
+        }
+        _kvp.Add((TokenType.ComplexStart, string.Empty));
+
+        while (CanRead)
+        {
+            ConsumeWhitespace();
+
+            if (PeekChar() == '}')
+            {
+                break;
+            }
+
+            ConsumeKeyValue();
+        }
+
+        var end = ConsumeChar();
+        if (end != '}')
+        {
+            throw new Exception("Failed to find complex end!");
+        }
+        _kvp.Add((TokenType.ComplexEnd, string.Empty));
+    }
+
+    private string ConsumeString()
+    {
+        ConsumeWhitespace();
+
+        var builder = new StringBuilder();
+        bool end = false;
+
+        var start = ConsumeChar();
+        if (start != '\"')
+        {
+            throw new Exception("Failed to find string!");
+        }
+        builder.Append(start);
+
+        while (CanRead)
+        {
+            var ch = ConsumeChar();
+
+            if (ch == '\\')
+            {
+                ch = ConsumeChar();
+                builder.Append(ch);
+                continue;
+            }
+
+            builder.Append(ch);
+
+            if (ch == '\"')
+            {
+                end = true;
+                break;
+            }
+        }
+
+        if (!end)
+        {
+            throw new Exception("Failed to find end of string character!");
+        }
+
+        return builder.ToString();
+    }
+
+    private string ConsumeWord(bool toLower)
+    {
+        ConsumeWhitespace();
+
+        var builder = new StringBuilder();
+        while (CanRead)
+        {
+            var peek = PeekChar();
+
+            // If we've reached whitespace or an equals, we're finished.
+            if (char.IsWhiteSpace(peek) || peek == '=')
+            {
+                break;
+            }
+
+            var ch = ConsumeChar();
+            if (toLower)
+            {
+                ch = char.ToLower(ch);
+            }
+            if (IsValidCharacter(ch))
+            {
+                builder.Append(ch);
+            }
+            else throw new Exception($"Invalid character in word '{ch}'");
+        }
+        return builder.ToString();
+    }
+
+    private char PeekChar()
+    {
+        return _text[_pointer];
+    }
+
+    private char ConsumeChar()
+    {
+        return _text[_pointer++];
+    }
+
+    private void ConsumeWhitespace()
+    {
+        while (CanRead)
+        {
+            if (char.IsWhiteSpace(PeekChar()))
+            {
+                _pointer++;
+            }
+            else return;
+        }
+    }
+
+    private static bool IsValidCharacter(char ch)
+    {
+        return char.IsLetterOrDigit(ch) || ch == '-' || ch == '_';
+    }
+}
