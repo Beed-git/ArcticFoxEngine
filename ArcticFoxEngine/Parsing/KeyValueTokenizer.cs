@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace ArcticFoxEngine.Parsing;
 
@@ -69,6 +70,12 @@ public class KeyValueTokenizer
                 return;
             }
 
+            if (PeekChar() == '(')
+            {
+                ConsumeArray();
+                return;
+            }
+
             string value;
             if (PeekChar() == '\"')
             {
@@ -112,6 +119,40 @@ public class KeyValueTokenizer
             throw new Exception("Failed to find complex end!");
         }
         _kvp.Add((TokenType.ComplexEnd, string.Empty));
+    }
+
+    private void ConsumeArray()
+    {
+        ConsumeWhitespace();
+
+        var start = ConsumeChar();
+        if (start is not '(' or '[')
+        {
+            throw new Exception("Failed to find array beginning!");
+        }
+
+        while (CanRead)
+        {
+            ConsumeWhitespace();
+
+            if (PeekChar() is ')' or ']')
+            {
+                break;
+            }
+
+            var value = ConsumeWord(true);
+            _kvp.Add((TokenType.Value, value));
+        }
+
+        var end = ConsumeChar();
+        if (start == '(' && end == '[')
+        {
+            throw new Exception("Array which starts with '(' cannot end with ']'");
+        }
+        else if (start == '[' && end == '(')
+        {
+            throw new Exception("Array which starts with '[' cannot end with ')");
+        }
     }
 
     private string ConsumeString()
@@ -165,8 +206,8 @@ public class KeyValueTokenizer
         {
             var peek = PeekChar();
 
-            // If we've reached whitespace or an equals, we're finished.
-            if (char.IsWhiteSpace(peek) || peek == '=')
+            // If we've reached whitespace, an equals, or an end character we're finished.
+            if (char.IsWhiteSpace(peek) || peek == '=' || IsEndCharacter(peek))
             {
                 break;
             }
@@ -180,7 +221,7 @@ public class KeyValueTokenizer
             {
                 builder.Append(ch);
             }
-            else throw new Exception($"Invalid character in word '{ch}'");
+            else throw new Exception($"Invalid character '{ch}' while parsing word '{builder}'");
         }
         return builder.ToString();
     }
@@ -209,6 +250,11 @@ public class KeyValueTokenizer
 
     private static bool IsValidCharacter(char ch)
     {
-        return char.IsLetterOrDigit(ch) || ch == '-' || ch == '_';
+        return char.IsLetterOrDigit(ch) || ch == '-' || ch == '_' || ch == '.';
+    }
+
+    private static bool IsEndCharacter(char ch)
+    {
+        return ch == '}' || ch == ']' || ch == ')';
     }
 }

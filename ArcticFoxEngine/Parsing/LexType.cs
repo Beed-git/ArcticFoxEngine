@@ -10,4 +10,5 @@ public enum LexType
 
     String,
     Integer,
+    Float,
 }
