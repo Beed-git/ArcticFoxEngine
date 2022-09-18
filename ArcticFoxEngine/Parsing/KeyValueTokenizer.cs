@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization.Json;
-using System.Text;
+﻿using System.Text;
 
 namespace ArcticFoxEngine.Parsing;
 
@@ -8,7 +7,7 @@ public class KeyValueTokenizer
     private string _text;
     private int _pointer;
 
-    private readonly List<(TokenType, string)> _kvp;
+    private readonly List<Token> _tokens;
 
     private bool CanRead => _pointer < _text.Length;
 
@@ -17,15 +16,15 @@ public class KeyValueTokenizer
         _text = string.Empty;
         _pointer = 0;
 
-        _kvp = new();
+        _tokens = new();
     }
 
-    public IEnumerable<(TokenType, string)> Parse(string text)
+    public IEnumerable<Token> Parse(string text)
     {
         _text = text;
         _pointer = 0;
 
-        _kvp.Clear();
+        _tokens.Clear();
 
         while (CanRead)
         {
@@ -37,7 +36,7 @@ public class KeyValueTokenizer
                 {
                     ConsumeChar();
                     var directive = ConsumeWord(true);
-                    _kvp.Add((TokenType.Directive, directive));
+                    _tokens.Add(new Token(TokenType.Directive, directive));
                     continue;
                 }
 
@@ -45,13 +44,13 @@ public class KeyValueTokenizer
             }
         }
 
-        return _kvp;
+        return _tokens;
     }
 
     private void ConsumeKeyValue()
     {
         var key = ConsumeWord(true);
-        _kvp.Add((TokenType.Key, key));
+        _tokens.Add(new Token(TokenType.Key, key));
 
         ConsumeWhitespace();
 
@@ -77,7 +76,7 @@ public class KeyValueTokenizer
             }
 
             var value = ConsumeStringOrWord();
-            _kvp.Add((TokenType.Value, value));
+            _tokens.Add(new Token(TokenType.Value, value));
         }
         else throw new Exception($"No value exists after '{key}='");
     }
@@ -91,7 +90,7 @@ public class KeyValueTokenizer
         {
             throw new Exception("Failed to find complex beginning!");
         }
-        _kvp.Add((TokenType.ComplexStart, string.Empty));
+        _tokens.Add(new Token(TokenType.ComplexStart, string.Empty));
 
         while (CanRead)
         {
@@ -114,7 +113,7 @@ public class KeyValueTokenizer
         {
             throw new Exception("Failed to find complex end!");
         }
-        _kvp.Add((TokenType.ComplexEnd, string.Empty));
+        _tokens.Add(new Token(TokenType.ComplexEnd, string.Empty));
     }
 
     private void ConsumeArray()
@@ -147,7 +146,7 @@ public class KeyValueTokenizer
             }
 
             var value = ConsumeStringOrWord();
-            _kvp.Add((TokenType.Value, value));
+            _tokens.Add(new Token(TokenType.Value, value));
         }
 
         var end = ConsumeChar();

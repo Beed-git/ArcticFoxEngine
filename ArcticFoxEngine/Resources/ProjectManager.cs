@@ -26,9 +26,21 @@ public class ProjectManager
             Directory.CreateDirectory(ProjectDirectory);
         }
 
-        AssetFolder = Path.Combine(ProjectDirectory, "assets");
+        AssetFolder = CreateRelativeFolder("assets");
+        BuildFolder = CreateRelativeFolder("build");
     }
     
     public string ProjectDirectory { get; private init; }
     public string AssetFolder { get; private init; }
+    public string BuildFolder { get; private init; }
+
+    private string CreateRelativeFolder(string relativeDirectory)
+    {
+        var path = Path.Combine(ProjectDirectory, relativeDirectory);
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+        return path;
+    }
 }

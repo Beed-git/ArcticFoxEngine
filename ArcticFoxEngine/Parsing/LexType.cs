@@ -1,9 +1,10 @@
 ﻿namespace ArcticFoxEngine.Parsing;
 
+public record struct Lex(LexType Type, string Value);
+
 public enum LexType
 {
     Unknown,
-    Directive,
     Key,
     ComplexStart,
     ComplexEnd,

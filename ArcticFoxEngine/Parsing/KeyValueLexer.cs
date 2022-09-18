@@ -7,41 +7,54 @@ public class KeyValueLexer
         StrictArrays = true;
     }
 
-    public IEnumerable<(LexType, string)> Lex(IEnumerable<(TokenType type, string value)> tokens)
+    public Dictionary<string, List<Lex>> Lex(IEnumerable<Token> tokens)
     {
-        var lexed = new List<(LexType, string)>();
+        var lexed = new Dictionary<string, List<Lex>>();
 
         TokenType lastToken = TokenType.Key;
         LexType lastLex = LexType.Unknown;
 
-        (LexType, string) lex;
-        foreach (var token in tokens)
+        List<Lex>? currentDirective = null;
+        Lex lex;
+        foreach (var (type, value) in tokens)
         {
-
-            if (token.type == TokenType.Value)
+            if (type == TokenType.Directive)
             {
-                lex = LexValueToken(token.value);
-                if (StrictArrays && lastToken == TokenType.Value &&
-                    lastLex != lex.Item1)
+                if (!lexed.TryGetValue(value, out currentDirective))
                 {
-                    throw new Exception($"Array mixed types {lastLex} and {lex.Item1}");
+                    currentDirective = new List<Lex>();
+                    lexed.Add(value, currentDirective);
+                }
+                continue;
+            }
+            else if (type == TokenType.Value)
+            {
+                lex = LexValueToken(value);
+                if (StrictArrays && 
+                    lastToken == TokenType.Value &&
+                    lastLex != lex.Type)
+                {
+                    throw new Exception($"Array mixed types {lastLex} and {lex.Type}");
                 }
             }
             else
             {
-                lex = token.type switch
+                lex = type switch
                 {
-                    TokenType.Directive => (LexType.Directive, token.value),
-                    TokenType.Key => (LexType.Key, token.value),
-                    TokenType.ComplexStart => (LexType.ComplexStart, token.value),
-                    TokenType.ComplexEnd => (LexType.ComplexEnd, token.value),
-                    _ => (LexType.Unknown, token.value)
+                    TokenType.Key => new Lex(LexType.Key, value),
+                    TokenType.ComplexStart => new Lex(LexType.ComplexStart, value),
+                    TokenType.ComplexEnd => new Lex(LexType.ComplexEnd, value),
+                    _ => new Lex(LexType.Unknown, value)
                 };
             }
 
-            lastToken = token.type;
-            lastLex = lex.Item1;
-            lexed.Add(lex);
+            lastToken = type;
+            lastLex = lex.Type;
+            if (currentDirective is null)
+            {
+                throw new Exception("Directive not set!");
+            }
+            currentDirective.Add(lex);
         }
 
         return lexed;
@@ -49,13 +62,13 @@ public class KeyValueLexer
 
     public bool StrictArrays { get; set; }
 
-    private static (LexType, string) LexValueToken(string value)
+    private static Lex LexValueToken(string value)
     {
         if (value.StartsWith('"'))
         {
             if (value.EndsWith('"'))
             {
-                return (LexType.String, value);
+                return new Lex(LexType.String, value);
             }
             else throw new Exception($"Invalid string, string does not end with '\"'\n{value}");
         }
@@ -70,14 +83,13 @@ public class KeyValueLexer
             return lexed;
         }
 
-        return (LexType.Unknown, value);
+        return new Lex(LexType.Unknown, value);
     }
 
-    private static bool TryLexInteger(string value, out (LexType, string) lexed)
+    private static bool TryLexInteger(string value, out Lex lexed)
     {
         int pointer = 0;
-        lexed = (LexType.Unknown, value);
-
+        lexed = new Lex(LexType.Unknown, value);
 
         // Check if number is negative
         if (value[pointer] == '-')
@@ -90,7 +102,7 @@ public class KeyValueLexer
         }
 
         // Hex number.
-        if (value[pointer] == '0' && char.ToLower(value[pointer + 1]) == 'x')
+        if (value.Length > 1 && value[pointer] == '0' && char.ToLower(value[pointer + 1]) == 'x')
         {
             pointer += 2;
 
@@ -107,7 +119,7 @@ public class KeyValueLexer
                 }
             }
             var number = Convert.ToInt32(value, 16).ToString();
-            lexed = (LexType.Integer, number);
+            lexed = new Lex(LexType.Integer, number);
             return true;
         }
         else
@@ -120,18 +132,18 @@ public class KeyValueLexer
                     return false;
                 }
             }
-            lexed = (LexType.Integer, value);
+            lexed = new Lex(LexType.Integer, value);
             return true;
         }
     }
 
-    private static bool TryLexFloat(string value, out (LexType, string) lexed)
+    private static bool TryLexFloat(string value, out Lex lexed)
     {
         int pointer = 0;
         bool decimalFound = false;
         bool numberFound = false;
 
-        lexed = (LexType.Unknown, value);
+        lexed = new Lex(LexType.Unknown, value);
 
         // Check if negative
         if (value[pointer] == '-')
@@ -151,7 +163,7 @@ public class KeyValueLexer
             {
                 if (value[^1] == 'f')
                 {
-                    lexed = (LexType.Float, value.Substring(0, value.Length - 1));
+                    lexed = new Lex(LexType.Float, value[..^1]);
                     return true;
                 }
             }
@@ -173,7 +185,7 @@ public class KeyValueLexer
             }
             return false;
         }
-        lexed = (LexType.Float, value);
+        lexed = new Lex(LexType.Float, value);
         return true;
     }
 }
