@@ -8,6 +8,9 @@ using ArcticFoxEngine.Rendering.Textures;
 using ArcticFoxEngine.Resources;
 using ArcticFoxEngine.Scripts;
 using Silk.NET.OpenGL;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace ArcticFoxEngine;
 
@@ -39,34 +42,87 @@ public class Core
             .WithLoader(new ScriptFactoryLoader(_logger))
             .Build();
 
-        var scene = new Scene(_graphicsDevice, _resourceManager);
-        scene.MainCamera = new Camera2D();
 
-        var player = scene.CreateEntity("player");
-        
-        var plyTransform = player.AddComponent<TransformComponent>();
-        plyTransform.Position = new Vector3(600, 10, 0);
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .DisableAliases()
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            .WithTagMapping(new TagName("!sprite"), typeof(SpriteComponent))
+            .WithTagMapping(new TagName("!transform"), typeof(TransformComponent))
+            .Build();
 
-        var plySprite = player.AddComponent<SpriteComponent>();
-        plySprite.Size = new Vector2i(40, 300);
-        plySprite.Texture = "128x.png";
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithTagMapping(new TagName("!sprite"), typeof(SpriteComponent))
+            .WithTagMapping(new TagName("!transform"), typeof(TransformComponent))
+            .Build();
 
-        var plyScript = _resourceManager.GetResource<ScriptFactory>("TestScript.cs");
-        if (plyScript.Data is not null)
+        var scenePath = Path.Combine(_projectManager.AssetFolder, "scene.yml");
+        if (File.Exists(scenePath))
         {
-            player.AddScript(plyScript.Data.CreateScript(player));
+            var sceneText = File.ReadAllText(scenePath);
+            var sceneModel = deserializer.Deserialize<SceneModel>(sceneText);
+
+            var scene = new Scene(_graphicsDevice, _resourceManager);
+            if (sceneModel.Camera is not null && sceneModel.Camera.ToLower() == "camera2d")
+            {
+                scene.MainCamera = new Camera2D();
+            }
+            else
+            {
+                _logger?.Error($"Unknown camera '{scene.MainCamera}'");
+                scene.MainCamera = new Camera2D();
+            }
+
+            foreach (var (name, entModel) in sceneModel.Entities)
+            {
+                var ent = scene.CreateEntity(name);
+                if (entModel.Components is not null)
+                {
+                    foreach (var component in entModel.Components)
+                    {
+                        ent.AddComponent(component);
+                    }
+                }
+                if (entModel.Scripts is not null)
+                {
+                    foreach (var script in entModel.Scripts)
+                    {
+                        var scriptResource = _resourceManager.GetResource<ScriptFactory>(script);
+                        if (scriptResource.Data is not null)
+                        {
+                            ent.AddScript(scriptResource.Data.CreateScript(ent));
+                        }
+                    }
+                }
+            }
+            _sceneManager.ChangeScene(scene);
         }
+        //var player = scene.CreateEntity("player");
+        
+        //var plyTransform = player.AddComponent<TransformComponent>();
+        //plyTransform.Position = new Vector3(600, 10, 0);
 
-        var enemy = scene.CreateEntity("enemy");
+        //var plySprite = player.AddComponent<SpriteComponent>();
+        //plySprite.Size = new Vector2i(40, 300);
+        //plySprite.Texture = "128x.png";
 
-        var eTransform = enemy.AddComponent<TransformComponent>();
-        eTransform.Position = new Vector3(0, 0, 0);
+        //var plyScript = _resourceManager.GetResource<ScriptFactory>("TestScript.cs");
+        //if (plyScript.Data is not null)
+        //{
+        //    player.AddScript(plyScript.Data.CreateScript(player));
+        //}
 
-        var eSprite = enemy.AddComponent<SpriteComponent>();
-        eSprite.Size = new Vector2i(100, 100);
-        eSprite.TextureRegion = new Rectangle(96, 96, 32, 32);
-        eSprite.Texture = "128x.png";
-        _sceneManager.ChangeScene(scene);
+        //var enemy = scene.CreateEntity("enemy");
+
+        //var eTransform = enemy.AddComponent<TransformComponent>();
+        //eTransform.Position = new Vector3(0, 0, 0);
+
+        //var eSprite = enemy.AddComponent<SpriteComponent>();
+        //eSprite.Size = new Vector2i(100, 100);
+        //eSprite.TextureRegion = new Rectangle(96, 96, 32, 32);
+        //eSprite.Texture = "128x.png";
+        //_sceneManager.ChangeScene(scene);
     }
 
     public void OnUpdate(double dt)

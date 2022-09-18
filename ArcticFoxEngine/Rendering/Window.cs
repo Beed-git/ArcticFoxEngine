@@ -100,6 +100,8 @@ public class Window : IDisposable
 
         ImGui.Text("[Components]");
         // ImGuiExtensions.DragInt2("Transform", ref i);
+        var v = new System.Numerics.Vector3();
+        ImGui.DragFloat3("s", ref v);
         ImGui.End();
 
         ImGui.Begin("Game");

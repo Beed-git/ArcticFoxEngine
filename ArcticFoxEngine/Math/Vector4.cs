@@ -2,10 +2,10 @@
 
 public struct Vector4
 {
-    public readonly float x;
-    public readonly float y;
-    public readonly float z;
-    public readonly float w;
+    public float x;
+    public float y;
+    public float z;
+    public float w;
 
     public Vector4(Vector2 vector) : this(vector.x, vector.y, 0.0f, 0.0f)
     {

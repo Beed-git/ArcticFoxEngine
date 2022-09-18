@@ -1,7 +1,5 @@
 ﻿using ArcticFoxEngine.Math;
 using ImGuiNET;
-using Silk.NET.Vulkan;
-
 namespace ArcticFoxEngine.Rendering;
 
 public static class ImGuiExtensions

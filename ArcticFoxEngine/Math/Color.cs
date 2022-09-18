@@ -1,6 +1,4 @@
-﻿using System.Xml;
-
-namespace ArcticFoxEngine.Math;
+﻿namespace ArcticFoxEngine.Math;
 
 public partial struct Color
 {

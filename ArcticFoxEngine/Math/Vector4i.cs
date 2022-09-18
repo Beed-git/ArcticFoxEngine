@@ -2,10 +2,10 @@
 
 public struct Vector4i
 {
-    public readonly int x;
-    public readonly int y;
-    public readonly int z;
-    public readonly int w;
+    public int x;
+    public int y;
+    public int z;
+    public int w;
 
     public Vector4i(Vector2i vector) : this(vector.x, vector.y, 0, 0)
     {

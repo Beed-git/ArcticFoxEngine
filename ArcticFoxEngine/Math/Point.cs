@@ -27,4 +27,14 @@ public struct Point
     {
         return $"(x:{x},y:{y})";
     }
+
+    public static bool operator ==(Point left, Point right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Point left, Point right)
+    {
+        return !(left == right);
+    }
 }

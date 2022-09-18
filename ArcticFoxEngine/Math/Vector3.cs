@@ -2,9 +2,9 @@
 
 public struct Vector3
 {
-    public readonly float x;
-    public readonly float y;
-    public readonly float z;
+    public float x;
+    public float y;
+    public float z;
 
     public Vector3(Vector2 vector) : this(vector.x, vector.y, 0.0f)
     {

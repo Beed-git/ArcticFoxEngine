@@ -17,6 +17,7 @@
     <PackageReference Include="Silk.NET" Version="2.16.0" />
     <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.16.0" />
     <PackageReference Include="StbImageSharp" Version="2.27.11" />
+    <PackageReference Include="YamlDotNet" Version="12.0.1" />
   </ItemGroup>
 
 </Project>

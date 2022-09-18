@@ -2,8 +2,8 @@
 
 public struct Vector2
 {
-    public readonly float x;
-    public readonly float y;
+    public float x;
+    public float y;
 
     public Vector2(float x, float y)
     {

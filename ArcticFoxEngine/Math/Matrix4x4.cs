@@ -7,10 +7,10 @@ using SM = Silk.NET.Maths;
 /// </summary>
 public struct Matrix4x4
 {
-    public readonly Vector4 row0;
-    public readonly Vector4 row1;
-    public readonly Vector4 row2;
-    public readonly Vector4 row3;
+    public Vector4 row0;
+    public Vector4 row1;
+    public Vector4 row2;
+    public Vector4 row3;
 
     public Matrix4x4(Vector4 row0, Vector4 row1, Vector4 row2, Vector4 row3)
     {

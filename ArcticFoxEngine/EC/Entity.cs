@@ -1,10 +1,11 @@
-﻿using ArcticFoxEngine.Scripts;
+﻿using ArcticFoxEngine.Components;
+using ArcticFoxEngine.Scripts;
 
 namespace ArcticFoxEngine.EC;
 
 public class Entity : IEntity
 {
-    private readonly HashSet<Component> _components;
+    private readonly HashSet<ComponentModel> _components;
     private readonly HashSet<BaseScript> _scripts;
 
     public Entity(int id) : this(id, $"Entity {id}")
@@ -16,7 +17,7 @@ public class Entity : IEntity
         Id = id;
         Name = name;
 
-        _components = new HashSet<Component>();
+        _components = new HashSet<ComponentModel>();
         _scripts = new HashSet<BaseScript>();
     }
 
@@ -27,9 +28,9 @@ public class Entity : IEntity
 
     // Components
 
-    public T? AddComponent<T>() where T : Component
+    public T? AddComponent<T>() where T : ComponentModel
     {
-        var component = Activator.CreateInstance(typeof(T), this);
+        var component = Activator.CreateInstance<T>();
         if (component is T t)
         {
             _components.Add(t);
@@ -41,7 +42,13 @@ public class Entity : IEntity
         }
     }
 
-    public bool HasComponent<T>() where T : Component
+    //TODO: Unexpected behaviour can occur as we are passing around a reference to the component.
+    public void AddComponent<T>(T component) where T : ComponentModel
+    {
+        _components.Add(component);
+    }
+
+    public bool HasComponent<T>() where T : ComponentModel
     {
         foreach (var component in _components)
         {
@@ -53,7 +60,7 @@ public class Entity : IEntity
         return false;
     }
 
-    public T? GetComponent<T>() where T : Component
+    public T? GetComponent<T>() where T : ComponentModel
     {
         foreach (var component in _components)
         {
@@ -65,7 +72,7 @@ public class Entity : IEntity
         return null;
     }
 
-    public bool TryGetComponent<T>(out T value) where T : Component
+    public bool TryGetComponent<T>(out T value) where T : ComponentModel
     {
         foreach (var component in _components)
         {
@@ -79,7 +86,7 @@ public class Entity : IEntity
         return false;
     }
 
-    public IEnumerable<T> GetComponents<T>() where T : Component
+    public IEnumerable<T> GetComponents<T>() where T : ComponentModel
     {
         var list = new List<T>();
         foreach (var component in _components)
@@ -92,12 +99,12 @@ public class Entity : IEntity
         return list;
     }
 
-    public void RemoveComponent<T>(T value) where T : Component
+    public void RemoveComponent<T>(T value) where T : ComponentModel
     {
         _components.Remove(value);
     }
 
-    public void RemoveComponents<T>() where T : Component
+    public void RemoveComponents<T>() where T : ComponentModel
     {
         _components.RemoveWhere(c => c is T);
     }

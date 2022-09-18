@@ -1,15 +1,10 @@
-﻿using ArcticFoxEngine.EC;
-using ArcticFoxEngine.Math;
+﻿using ArcticFoxEngine.Math;
 
 namespace ArcticFoxEngine.Components;
 
-public class TransformComponent : Component
+public class TransformComponent : ComponentModel
 {
-    public Vector3 Position;
-
-    public TransformComponent(Entity parent) : base(parent)
-    {
-    }
+    public Vector3 Position { get; set; }
 
     public override string ToString()
     {
