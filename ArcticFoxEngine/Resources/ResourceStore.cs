@@ -1,6 +1,6 @@
 ﻿using ArcticFoxEngine.Logging;
 
-namespace ArcticFoxEngine.Rendering.Resources;
+namespace ArcticFoxEngine.Resources;
 
 public interface IResourceStore : IDisposable
 {
@@ -8,15 +8,15 @@ public interface IResourceStore : IDisposable
 
 public class ResourceStore<T> : IResourceStore, IDisposable where T : class
 {
-    private readonly string _rootPath;
-    private readonly ILogger _logger;
+    private readonly ProjectManager _projectManager;
+    private readonly ILogger? _logger;
 
     private readonly IResourceLoader<T>? _loader;
     private readonly Dictionary<string, Resource<T>> _resources;
 
-    public ResourceStore(string rootPath, ILogger logger, IResourceLoader<T>? loader)
+    public ResourceStore(ProjectManager projectManager, ILogger? logger, IResourceLoader<T>? loader)
     {
-        _rootPath = rootPath;
+        _projectManager = projectManager;
         _logger = logger;
         _loader = loader;
         _resources = new Dictionary<string, Resource<T>>();
@@ -31,7 +31,7 @@ public class ResourceStore<T> : IResourceStore, IDisposable where T : class
         resource = new Resource<T>(path);
         if (_loader is not null)
         {
-            resource.Data = _loader.LoadResource(Path.Combine(_rootPath, path));
+            resource.Data = _loader.LoadResource(Path.Combine(_projectManager.AssetFolder, path));
         }
         _resources.Add(path, resource);
         return resource;
@@ -41,7 +41,7 @@ public class ResourceStore<T> : IResourceStore, IDisposable where T : class
     {
         if (_resources.TryGetValue(path, out var resource))
         {
-            _logger.Log($"Resource already exists at path {path}.");
+            _logger?.Log($"Resource already exists at path {path}.");
             return resource;
         }
         resource = new Resource<T>(path, data);
@@ -57,7 +57,7 @@ public class ResourceStore<T> : IResourceStore, IDisposable where T : class
         }
         else
         {
-            _logger.Log($"Attempting to delete not-existant resource at path {path}.");
+            _logger?.Log($"Attempting to delete not-existant resource at path {path}.");
         }
     }
 

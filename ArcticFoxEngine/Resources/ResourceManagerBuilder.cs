@@ -1,27 +1,33 @@
 ﻿using System.Collections.ObjectModel;
 using ArcticFoxEngine.Logging;
 
-namespace ArcticFoxEngine.Rendering.Resources;
+namespace ArcticFoxEngine.Resources;
 
 public class ResourceManagerBuilder
 {
-    private readonly ILogger _logger;
     private readonly Dictionary<Type, IResourceLoader> _loaders;
 
-    public ResourceManagerBuilder(ILogger logger)
+    public ResourceManagerBuilder(ProjectManager projectManager)
     {
-        _logger = logger;
+        ProjectManager = projectManager;
         _loaders = new Dictionary<Type, IResourceLoader>();
     }
 
-    public ILogger Logger => _logger;
+    public ProjectManager ProjectManager { get; private set; }
+    public ILogger? Logger { get; private set; }
     public ReadOnlyDictionary<Type, IResourceLoader> Loaders => new(_loaders);
+
+    public ResourceManagerBuilder WithLogger(ILogger logger)
+    {
+        Logger = logger;
+        return this;
+    }
 
     public ResourceManagerBuilder WithLoader<T>(IResourceLoader<T> loader)
     {
         if (_loaders.ContainsKey(typeof(T)))
         {
-            _logger.Log($"Loader for type {typeof(T).Name} already exists.");
+            Logger?.Log($"Loader for type {typeof(T).Name} already exists.");
         }
         else
         {

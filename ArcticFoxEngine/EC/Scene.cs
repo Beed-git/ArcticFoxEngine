@@ -2,9 +2,9 @@
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
 using ArcticFoxEngine.Rendering.Camera;
-using ArcticFoxEngine.Rendering.Resources;
 using ArcticFoxEngine.Rendering.Sprites;
 using ArcticFoxEngine.Rendering.Textures;
+using ArcticFoxEngine.Resources;
 
 namespace ArcticFoxEngine.EC;
 

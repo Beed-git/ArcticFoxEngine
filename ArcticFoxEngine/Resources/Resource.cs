@@ -1,4 +1,4 @@
-﻿namespace ArcticFoxEngine.Rendering.Resources;
+﻿namespace ArcticFoxEngine.Resources;
 
 public class Resource<T> where T : class
 {
@@ -12,7 +12,7 @@ public class Resource<T> where T : class
     {
         Path = path;
         Data = data;
-    }   
+    }
 
     public string Path { get; }
     public T? Data { get; set; }

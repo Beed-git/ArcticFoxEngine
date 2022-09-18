@@ -1,7 +1,7 @@
-﻿using ArcticFoxEngine.Rendering.Textures;
+﻿using ArcticFoxEngine.Resources;
 using StbImageSharp;
 
-namespace ArcticFoxEngine.Rendering.Resources;
+namespace ArcticFoxEngine.Rendering.Textures;
 
 public class TextureLoader : IResourceLoader<Texture2D>
 {

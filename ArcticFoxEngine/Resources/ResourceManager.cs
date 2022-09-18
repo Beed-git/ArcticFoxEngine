@@ -1,47 +1,33 @@
 ﻿using ArcticFoxEngine.Logging;
-using System.Reflection;
 
-namespace ArcticFoxEngine.Rendering.Resources;
+namespace ArcticFoxEngine.Resources;
 
 public class ResourceManager : IDisposable
 {
-    private const string _assetFolder = "assets";
-
-    private readonly string _rootPath;
-    private readonly ILogger _logger;
+    private readonly ProjectManager _projectManager;
+    private readonly ILogger? _logger;
 
     private readonly Dictionary<Type, IResourceStore> _stores;
 
     public ResourceManager(ResourceManagerBuilder builder)
     {
+        _projectManager = builder.ProjectManager;
         _logger = builder.Logger;
 
-        var location = Assembly.GetExecutingAssembly().Location;
-        var parent = Directory.GetParent(location);
-        if (parent is null)
-        {
-            throw new Exception("Failed to find engine folder.");
-        }
-        _rootPath = Path.Combine(parent.FullName, _assetFolder);
-        if (!Directory.Exists(_rootPath))
-        {
-            Directory.CreateDirectory(_rootPath);
-        }
-
-        _logger.Log($"Asset directory is {_rootPath}");
+        _logger?.Log($"Asset directory is {builder.ProjectManager.AssetFolder}");
 
         _stores = new Dictionary<Type, IResourceStore>();
         foreach (var (type, loader) in builder.Loaders)
         {
             var resourceType = typeof(ResourceStore<>).MakeGenericType(type);
-            var store = Activator.CreateInstance(resourceType, _rootPath, _logger, loader);
+            var store = Activator.CreateInstance(resourceType, _projectManager, _logger, loader);
             if (store is not null)
             {
                 _stores.Add(type, (IResourceStore)store);
             }
             else
             {
-                _logger.Log($"Failed to create resource storage for type {type.Name}.");
+                _logger?.Log($"Failed to create resource storage for type {type.Name}.");
             }
         }
     }
@@ -89,7 +75,7 @@ public class ResourceManager : IDisposable
         }
         else
         {
-            storage = new ResourceStore<T>(_rootPath, _logger, null);
+            storage = new ResourceStore<T>(_projectManager, _logger, null);
             _stores.Add(type, storage);
         }
         return storage;

@@ -1,4 +1,4 @@
-﻿namespace ArcticFoxEngine.Rendering.Resources;
+﻿namespace ArcticFoxEngine.Resources;
 
 public interface IResourceLoader
 {

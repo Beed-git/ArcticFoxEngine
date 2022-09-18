@@ -4,7 +4,8 @@ using ArcticFoxEngine.Logging;
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
 using ArcticFoxEngine.Rendering.Camera;
-using ArcticFoxEngine.Rendering.Resources;
+using ArcticFoxEngine.Rendering.Textures;
+using ArcticFoxEngine.Resources;
 using ArcticFoxEngine.Scripts;
 using Silk.NET.OpenGL;
 
@@ -17,6 +18,7 @@ public class Core
 
     private readonly ILogger _logger;
 
+    private ProjectManager _projectManager;
     private ResourceManager _resourceManager;
 
     public Core(GraphicsDevice graphics)
@@ -29,7 +31,10 @@ public class Core
 
     public void OnLoad()
     {
-        _resourceManager = new ResourceManagerBuilder(_logger)
+        _projectManager = new ProjectManager("projects/project1");
+
+        _resourceManager = new ResourceManagerBuilder(_projectManager)
+            .WithLogger(_logger)
             .WithLoader(new TextureLoader(_graphicsDevice))
             .WithLoader(new ScriptFactoryLoader(_logger))
             .Build();

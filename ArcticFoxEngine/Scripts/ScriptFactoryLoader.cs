@@ -1,5 +1,5 @@
 ﻿using ArcticFoxEngine.Logging;
-using ArcticFoxEngine.Rendering.Resources;
+using ArcticFoxEngine.Resources;
 using Basic.Reference.Assemblies;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
