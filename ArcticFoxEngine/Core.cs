@@ -5,7 +5,6 @@ using ArcticFoxEngine.EC.Models;
 using ArcticFoxEngine.Logging;
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
-using ArcticFoxEngine.Rendering.Camera;
 using ArcticFoxEngine.Rendering.Textures;
 using ArcticFoxEngine.Resources;
 using ArcticFoxEngine.Scripts;
@@ -82,7 +81,13 @@ public class Core
 
     public unsafe void OnRender(double dt)
     {
-        _graphicsDevice.GL.ClearColor(System.Drawing.Color.SteelBlue);
+        if (CurrentScene is not null)
+        {
+
+        }
+        var backgroundColor = CurrentScene is null ? Color.SteelBlue : CurrentScene.BackgroundColor;
+
+        _graphicsDevice.GL.ClearColor(backgroundColor);
         _graphicsDevice.GL.Clear(ClearBufferMask.ColorBufferBit);
 
         _sceneManager.Render(dt);

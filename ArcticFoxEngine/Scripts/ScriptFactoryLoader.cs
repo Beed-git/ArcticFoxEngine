@@ -22,6 +22,8 @@ public class ScriptFactoryLoader : IResourceLoader<ScriptFactory>
         {
             return null;
         }
+        return null;
+
         var code = File.ReadAllText(path);
 
         var references = ReferenceAssemblies.Net60.ToList();

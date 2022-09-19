@@ -50,6 +50,7 @@ public static class SceneModelConverter
         {
             Name = scene.Name,
             Camera = scene.MainCamera.GetType().Name,
+            BackgroundColor = scene.BackgroundColor,
             Entities = entities
         };
     }
@@ -59,7 +60,8 @@ public static class SceneModelConverter
         var scene = new Scene(graphicsDevice, resourceManager)
         {
             Name = model.Name,
-            MainCamera = GetCamera(model.Camera)
+            MainCamera = GetCamera(model.Camera),
+            BackgroundColor = model.BackgroundColor,
         };
 
         foreach (var (name, entModel) in model.Entities)

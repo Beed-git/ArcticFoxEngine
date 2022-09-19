@@ -29,7 +29,8 @@ public class Scene
 
     public string Name { get; set; }
     public ICamera MainCamera { get; set; }
-    internal EntityManager EntityManager { get; private init; }
+    public Color BackgroundColor { get; set; }
+    public EntityManager EntityManager { get; private init; }
 
     public void Start()
     {

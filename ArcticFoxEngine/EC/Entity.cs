@@ -28,7 +28,7 @@ public class Entity : IEntity
 
     // Components
 
-    internal IEnumerable<IComponentModel> GetAllComponents()
+    public IEnumerable<IComponentModel> GetAllComponents()
     {
         return _components;
     }
@@ -133,5 +133,10 @@ public class Entity : IEntity
     {
         var key = typeof(T).Name;
         _scripts.Remove(key);
+    }
+
+    public override string ToString()
+    {
+        return Name;
     }
 }

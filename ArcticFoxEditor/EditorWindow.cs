@@ -10,6 +10,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using SilkWindow = Silk.NET.Windowing.Window;
 using ArcticFoxEngine.Logging;
+using ArcticFoxEditor.EditorImGui;
 
 namespace ArcticFoxEditor;
 
@@ -21,6 +22,7 @@ public class EditorWindow : IDisposable
     private GL _gl;
     private GraphicsDevice? _graphicsDevice;
 
+    private EditorImGuiPanels _editorImGui;
     private ImGuiController _imGuiController;
     private IInputContext _inputContext;
 
@@ -78,6 +80,8 @@ public class EditorWindow : IDisposable
         _core = new Core(_graphicsDevice, new ConsoleLogger());
         _core.OnLoad();
         _core.OnResize(new Vector2i((int)_lastImguiImageSize.X, (int)_lastImguiImageSize.Y));
+
+        _editorImGui = new EditorImGuiPanels(_core);
     }
 
     private void OnUpdate(double dt)
@@ -94,17 +98,8 @@ public class EditorWindow : IDisposable
 
         ImGui.DockSpaceOverViewport();
 
-        ImGui.Begin("Properties");
-
-        ImGui.Text("[Entity]");
-        ImGui.Text("Entity name");
-        ImGui.NewLine();
-
-        ImGui.Text("[Components]");
-        // ImGuiExtensions.DragInt2("Transform", ref i);
-        var v = new System.Numerics.Vector3();
-        ImGui.DragFloat3("s", ref v);
-        ImGui.End();
+        _editorImGui.DrawPropertiesPanel();
+        _editorImGui.DrawEntityPanel();
 
         ImGui.Begin("Game");
         ImGui.BeginChild("GLContext");
