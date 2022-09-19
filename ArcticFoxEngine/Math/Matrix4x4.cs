@@ -1,5 +1,6 @@
 ﻿namespace ArcticFoxEngine.Math;
 
+using YamlDotNet.Serialization;
 using SM = Silk.NET.Maths;
 
 /// <summary>
@@ -20,21 +21,37 @@ public struct Matrix4x4
         this.row3 = row3;
     }
 
+    [YamlIgnore]
     public float M00 => row0.x;
+    [YamlIgnore]
     public float M01 => row0.y;
+    [YamlIgnore]
     public float M02 => row0.z;
+    [YamlIgnore]
     public float M03 => row0.w;
+    [YamlIgnore]
     public float M10 => row1.x;
+    [YamlIgnore]
     public float M11 => row1.y;
+    [YamlIgnore]
     public float M12 => row1.z;
+    [YamlIgnore]
     public float M13 => row1.w;
+    [YamlIgnore]
     public float M20 => row2.x;
+    [YamlIgnore]
     public float M21 => row2.y;
+    [YamlIgnore]
     public float M22 => row2.z;
+    [YamlIgnore]
     public float M23 => row2.w;
+    [YamlIgnore]
     public float M30 => row3.x;
+    [YamlIgnore]
     public float M31 => row3.y;
+    [YamlIgnore]
     public float M32 => row3.z;
+    [YamlIgnore]
     public float M33 => row3.w;
 
     public static Matrix4x4 Identity => new(Vector4.UnitX, Vector4.UnitY, Vector4.UnitZ, Vector4.UnitW);

@@ -1,12 +1,12 @@
-﻿using ArcticFoxEngine.Components;
+﻿using ArcticFoxEngine.EC.Models;
 using ArcticFoxEngine.Scripts;
 
 namespace ArcticFoxEngine.EC;
 
 public class Entity : IEntity
 {
-    private readonly HashSet<ComponentModel> _components;
-    private readonly HashSet<BaseScript> _scripts;
+    private readonly HashSet<IComponentModel> _components;
+    private readonly Dictionary<string, BaseScript> _scripts;
 
     public Entity(int id) : this(id, $"Entity {id}")
     {
@@ -17,18 +17,23 @@ public class Entity : IEntity
         Id = id;
         Name = name;
 
-        _components = new HashSet<ComponentModel>();
-        _scripts = new HashSet<BaseScript>();
+        _components = new HashSet<IComponentModel>();
+        _scripts = new Dictionary<string, BaseScript>();
     }
 
     public string Name { get; set; }
     public int Id { get; private init; }
     public bool Started { get; set; }
-    public IEnumerable<BaseScript> Scripts => _scripts;
+    public Dictionary<string, BaseScript> Scripts => _scripts;
 
     // Components
 
-    public T? AddComponent<T>() where T : ComponentModel
+    internal IEnumerable<IComponentModel> GetAllComponents()
+    {
+        return _components;
+    }
+
+    public T? AddComponent<T>() where T : class, IComponentModel
     {
         var component = Activator.CreateInstance<T>();
         if (component is T t)
@@ -43,12 +48,12 @@ public class Entity : IEntity
     }
 
     //TODO: Unexpected behaviour can occur as we are passing around a reference to the component.
-    public void AddComponent<T>(T component) where T : ComponentModel
+    public void AddComponent<T>(T component) where T : class, IComponentModel
     {
         _components.Add(component);
     }
 
-    public bool HasComponent<T>() where T : ComponentModel
+    public bool HasComponent<T>() where T : class, IComponentModel
     {
         foreach (var component in _components)
         {
@@ -60,7 +65,7 @@ public class Entity : IEntity
         return false;
     }
 
-    public T? GetComponent<T>() where T : ComponentModel
+    public T? GetComponent<T>() where T : class, IComponentModel
     {
         foreach (var component in _components)
         {
@@ -72,7 +77,7 @@ public class Entity : IEntity
         return null;
     }
 
-    public bool TryGetComponent<T>(out T value) where T : ComponentModel
+    public bool TryGetComponent<T>(out T value) where T : class, IComponentModel
     {
         foreach (var component in _components)
         {
@@ -86,7 +91,7 @@ public class Entity : IEntity
         return false;
     }
 
-    public IEnumerable<T> GetComponents<T>() where T : ComponentModel
+    public IEnumerable<T> GetComponents<T>() where T : class, IComponentModel
     {
         var list = new List<T>();
         foreach (var component in _components)
@@ -99,22 +104,24 @@ public class Entity : IEntity
         return list;
     }
 
-    public void RemoveComponent<T>(T value) where T : ComponentModel
+    public void RemoveComponent<T>(T value) where T : class, IComponentModel
     {
         _components.Remove(value);
     }
 
-    public void RemoveComponents<T>() where T : ComponentModel
+    public void RemoveComponents<T>() where T : class, IComponentModel
     {
         _components.RemoveWhere(c => c is T);
     }
 
     // Scripts
-    public void AddScript(BaseScript script) 
+    public void AddScript<T>(T script) where T : BaseScript
     {
-        if (!_scripts.Contains(script))
+        var type = script.GetType();
+        var key = type.FullName;
+        if (!_scripts.ContainsKey(key))
         {
-            _scripts.Add(script);
+            _scripts.Add(key, script);
             if (Started)
             {
                 script.OnCreate();
@@ -122,8 +129,9 @@ public class Entity : IEntity
         }
     }
 
-    public void RemoveScript(BaseScript script)
+    public void RemoveScript<T>() where T : BaseScript
     {
-        _scripts.Remove(script);
+        var key = typeof(T).Name;
+        _scripts.Remove(key);
     }
 }

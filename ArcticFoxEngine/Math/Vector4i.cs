@@ -1,4 +1,6 @@
-﻿namespace ArcticFoxEngine.Math;
+﻿using YamlDotNet.Serialization;
+
+namespace ArcticFoxEngine.Math;
 
 public struct Vector4i
 {
@@ -42,8 +44,11 @@ public struct Vector4i
     public static Vector4i UnitZ => new(0, 0, 1, 0);
     public static Vector4i UnitW => new(0, 0, 0, 1);
 
+    [YamlIgnore]
     public Vector3i XYZ => new(x, y, z);
+    [YamlIgnore]
     public Vector2i XY => new(x, y);
+    [YamlIgnore]
     public Vector2i ZW => new(z, w);
 
     public override bool Equals(object? obj)

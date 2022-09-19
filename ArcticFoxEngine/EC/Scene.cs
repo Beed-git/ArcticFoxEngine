@@ -1,4 +1,4 @@
-﻿using ArcticFoxEngine.Components;
+﻿using ArcticFoxEngine.EC.Components;
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
 using ArcticFoxEngine.Rendering.Camera;
@@ -15,7 +15,6 @@ public class Scene
 
     private readonly SpriteBatch _spriteBatch;
 
-    private readonly EntityManager _entityManager;
     private bool _started;
 
     public Scene(GraphicsDevice graphicsDevice, ResourceManager resourceManager)
@@ -24,18 +23,20 @@ public class Scene
         _resourceManager = resourceManager;
 
         _spriteBatch = new SpriteBatch(graphicsDevice);
-        _entityManager = new EntityManager();
+        EntityManager = new EntityManager();
         _started = false;
     }
 
+    public string Name { get; set; }
     public ICamera MainCamera { get; set; }
+    internal EntityManager EntityManager { get; private init; }
 
     public void Start()
     {
         _started = true;
-        foreach (var ent in _entityManager.GetEntities())
+        foreach (var ent in EntityManager.GetEntities())
         {
-            foreach (var script in ent.Scripts)
+            foreach (var script in ent.Scripts.Values)
             {
                 script.OnCreate();
             }
@@ -44,9 +45,9 @@ public class Scene
 
     public void Update(double dt)
     {
-        foreach (var ent in _entityManager.GetEntities())
+        foreach (var ent in EntityManager.GetEntities())
         {
-            foreach (var script in ent.Scripts)
+            foreach (var script in ent.Scripts.Values)
             {
                 script.OnUpdate(dt);
             }
@@ -57,7 +58,7 @@ public class Scene
     {
         _spriteBatch.BeginDraw(MainCamera);
 
-        var entities = _entityManager.GetEntities();
+        var entities = EntityManager.GetEntities();
         foreach (var ent in entities)
         {
             if (ent.TryGetComponent<TransformComponent>(out var transform) &&
@@ -79,20 +80,20 @@ public class Scene
 
     public Entity CreateEntity()
     {
-        var ent = _entityManager.CreateEntity();
+        var ent = EntityManager.CreateEntity();
         ent.Started = _started;
         return ent;
     }
 
     public Entity CreateEntity(string name)
     {
-        var ent = _entityManager.CreateEntity(name);
+        var ent = EntityManager.CreateEntity(name);
         ent.Started = _started;
         return ent;
     }
 
     public void RemoveEntity(Entity entity)
     {
-        _entityManager.RemoveEntity(entity);
+        EntityManager.RemoveEntity(entity);
     }
 }

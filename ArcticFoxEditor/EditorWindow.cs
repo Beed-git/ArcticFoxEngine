@@ -1,17 +1,19 @@
-﻿using Silk.NET.Input;
-using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
-using Silk.NET.Windowing;
-using SilkWindow = Silk.NET.Windowing.Window;
-using ImGuiNET;
+﻿using ArcticFoxEngine;
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering.Textures;
-using ArcticFoxEngine.Rendering.Sprites;
+using ArcticFoxEngine.Rendering;
+using ImGuiNET;
+using Silk.NET.Input;
+using Silk.NET.Maths;
+using Silk.NET.OpenGL.Extensions.ImGui;
+using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
+using SilkWindow = Silk.NET.Windowing.Window;
+using ArcticFoxEngine.Logging;
 
-namespace ArcticFoxEngine.Rendering;
+namespace ArcticFoxEditor;
 
-public class Window : IDisposable
+public class EditorWindow : IDisposable
 {
     private readonly IWindow _window;
     private Core? _core;
@@ -26,7 +28,7 @@ public class Window : IDisposable
 
     private System.Numerics.Vector2 _lastImguiImageSize;
 
-    public Window(WindowSettings settings)
+    public EditorWindow(WindowSettings settings)
     {
         var options = WindowOptions.Default;
         options.Title = settings.Title;
@@ -73,7 +75,7 @@ public class Window : IDisposable
 
         _imGuiController = new ImGuiController(_gl, _window, _inputContext, ConfigureImgui);
 
-        _core = new Core(_graphicsDevice);
+        _core = new Core(_graphicsDevice, new ConsoleLogger());
         _core.OnLoad();
         _core.OnResize(new Vector2i((int)_lastImguiImageSize.X, (int)_lastImguiImageSize.Y));
     }
@@ -107,8 +109,6 @@ public class Window : IDisposable
         ImGui.Begin("Game");
         ImGui.BeginChild("GLContext");
 
-        ImGui.ShowDemoWindow();
-
         // Draw the game to the render target.
         _target.Bind();
         _core?.OnRender(dt);
@@ -122,6 +122,7 @@ public class Window : IDisposable
             _target.Resize((uint)s.x, (uint)s.y);
             _core?.OnResize(s);
         }
+
         _lastImguiImageSize = size;
         ImGui.Image((IntPtr)_target.TextureHandle, size, new(0, 1), new(1, 0));
 

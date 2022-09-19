@@ -9,9 +9,9 @@ namespace ArcticFoxEngine.Scripts;
 
 public class ScriptFactoryLoader : IResourceLoader<ScriptFactory>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger? _logger;
 
-    public ScriptFactoryLoader(ILogger logger)
+    public ScriptFactoryLoader(ILogger? logger)
     {
         _logger = logger;
     }
@@ -46,15 +46,15 @@ public class ScriptFactoryLoader : IResourceLoader<ScriptFactory>
                     return new ScriptFactory(type);
                 }
             }
-            _logger.Error("Failed to find a class which implements BaseScript!");
+            _logger?.Error("Failed to find a class which implements BaseScript!");
             return null;
         }
         else
         {
-            _logger.Log("Failed to compile!");
+            _logger?.Log("Failed to compile!");
             foreach (var error in result.Diagnostics)
             {
-                _logger.Error(error.ToString());
+                _logger?.Error(error.ToString());
             }
             return null;
         }

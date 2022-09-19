@@ -1,4 +1,4 @@
-﻿namespace ArcticFoxEngine.Components;
+﻿namespace ArcticFoxEngine.EC.Models;
 
 public class SceneModel
 {

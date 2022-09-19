@@ -17,7 +17,7 @@ public class ResourceManagerBuilder
     public ILogger? Logger { get; private set; }
     public ReadOnlyDictionary<Type, IResourceLoader> Loaders => new(_loaders);
 
-    public ResourceManagerBuilder WithLogger(ILogger logger)
+    public ResourceManagerBuilder WithLogger(ILogger? logger)
     {
         Logger = logger;
         return this;

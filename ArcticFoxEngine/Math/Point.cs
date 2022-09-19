@@ -11,6 +11,9 @@ public struct Point
         this.y = y;
     }
 
+    public static Point Zero => new(0, 0);
+    public static Point One => new(1, 1);
+
     public override bool Equals(object? obj)
     {
         return obj is Point point &&

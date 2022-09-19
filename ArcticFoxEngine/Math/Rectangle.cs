@@ -1,4 +1,6 @@
-﻿namespace ArcticFoxEngine.Math;
+﻿using YamlDotNet.Serialization;
+
+namespace ArcticFoxEngine.Math;
 
 public struct Rectangle
 {
@@ -15,7 +17,9 @@ public struct Rectangle
         this.height = height;
     }
 
+    [YamlIgnore]
     public Point XY => new(x, y);
+    [YamlIgnore]
     public Point WH => new(width, height);
     public static Rectangle Zero => new(0, 0, 0, 0);
 
