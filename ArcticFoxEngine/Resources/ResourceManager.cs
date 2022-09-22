@@ -4,7 +4,7 @@ namespace ArcticFoxEngine.Resources;
 
 public class ResourceManager : IDisposable
 {
-    private readonly ProjectManager _projectManager;
+    private readonly FileManager _projectManager;
     private readonly ILogger? _logger;
 
     private readonly Dictionary<Type, IResourceStore> _stores;
@@ -32,17 +32,6 @@ public class ResourceManager : IDisposable
         }
     }
 
-    public Resource<T> CreateResource<T>(string path, T data) where T : class
-    {
-        if (!Uri.IsWellFormedUriString(path, UriKind.Relative))
-        {
-            throw new Exception($"Invalid path! {path}");
-        }
-
-        var storage = GetOrCreateStore<T>();
-        return storage.CreateResource(path, data);
-    }
-
     public Resource<T> GetResource<T>(string path) where T : class
     {
         if (!Uri.IsWellFormedUriString(path, UriKind.Relative))
@@ -52,17 +41,6 @@ public class ResourceManager : IDisposable
 
         var storage = GetOrCreateStore<T>();
         return storage.GetResource(path);
-    }
-
-    public void DeleteResource<T>(string path) where T : class
-    {
-        if (!Uri.IsWellFormedUriString(path, UriKind.Relative))
-        {
-            throw new Exception($"Invalid path! {path}");
-        }
-
-        var storage = GetOrCreateStore<T>();
-        storage.DeleteResource(path);
     }
 
     private ResourceStore<T> GetOrCreateStore<T>() where T : class

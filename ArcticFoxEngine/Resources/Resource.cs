@@ -14,6 +14,6 @@ public class Resource<T> where T : class
         Data = data;
     }
 
-    public string Path { get; }
+    public string Path { get; private init; }
     public T? Data { get; set; }
 }

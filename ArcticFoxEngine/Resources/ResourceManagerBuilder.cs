@@ -7,13 +7,13 @@ public class ResourceManagerBuilder
 {
     private readonly Dictionary<Type, IResourceLoader> _loaders;
 
-    public ResourceManagerBuilder(ProjectManager projectManager)
+    public ResourceManagerBuilder(FileManager projectManager)
     {
         ProjectManager = projectManager;
         _loaders = new Dictionary<Type, IResourceLoader>();
     }
 
-    public ProjectManager ProjectManager { get; private set; }
+    public FileManager ProjectManager { get; private set; }
     public ILogger? Logger { get; private set; }
     public ReadOnlyDictionary<Type, IResourceLoader> Loaders => new(_loaders);
 

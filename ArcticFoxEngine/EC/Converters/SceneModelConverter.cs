@@ -78,14 +78,12 @@ public static class SceneModelConverter
             }
             if (entModel.Scripts is not null)
             {
-                foreach (var script in entModel.Scripts)
+                foreach (var path in entModel.Scripts)
                 {
-                    //TODO: Not sure how scripts are going to be handled yet.
-                    Console.WriteLine($"Entity '{name}' has script '{script}'");
-                    var factory = resourceManager.GetResource<ScriptFactory>(script);
-                    if (factory.Data is not null)
+                    var script = resourceManager.GetResource<ScriptFactory>(path);
+                    if (script.Data is not null)
                     { 
-                        ent.AddScript(factory.Data.CreateScript(ent));
+                        ent.AddScript(script.Data.CreateScript(ent));
                     }
                 }
             }

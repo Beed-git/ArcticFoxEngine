@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArcticFoxEngine", "ArcticFo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{6B4E9DE6-B063-4195-AFFB-7433F441537D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcticFoxEditor", "ArcticFoxEditor\ArcticFoxEditor.csproj", "{C2F48FCB-901B-4198-9CD4-EE14A951F5E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArcticFoxEditor", "ArcticFoxEditor\ArcticFoxEditor.csproj", "{FD861E25-E01E-4A17-AD3E-AC06EB585BC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B4E9DE6-B063-4195-AFFB-7433F441537D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C2F48FCB-901B-4198-9CD4-EE14A951F5E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2F48FCB-901B-4198-9CD4-EE14A951F5E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2F48FCB-901B-4198-9CD4-EE14A951F5E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2F48FCB-901B-4198-9CD4-EE14A951F5E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD861E25-E01E-4A17-AD3E-AC06EB585BC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD861E25-E01E-4A17-AD3E-AC06EB585BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD861E25-E01E-4A17-AD3E-AC06EB585BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD861E25-E01E-4A17-AD3E-AC06EB585BC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

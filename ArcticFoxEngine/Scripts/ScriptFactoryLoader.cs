@@ -1,64 +1,50 @@
 ﻿using ArcticFoxEngine.Logging;
 using ArcticFoxEngine.Resources;
-using Basic.Reference.Assemblies;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 
 namespace ArcticFoxEngine.Scripts;
 
-public class ScriptFactoryLoader : IResourceLoader<ScriptFactory>
+public class ScriptFactoryLoader  : IResourceLoader<ScriptFactory>
 {
     private readonly ILogger? _logger;
+    private Dictionary<string, Type> _types;
 
-    public ScriptFactoryLoader(ILogger? logger)
+    public ScriptFactoryLoader (ILogger? logger, IEnumerable<Assembly> scriptAssemblies)
     {
         _logger = logger;
+        _types = new Dictionary<string, Type>();
+
+        foreach (var assembly in scriptAssemblies)
+        {
+            var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(BaseScript)));
+            foreach (var type in types)
+            {
+                if (type.FullName is not null)
+                {
+                    _types.Add(type.FullName, type);
+                }
+                else
+                {
+                    if (type.IsGenericType)
+                    {
+                        _logger?.Error("BaseScript cannot be a generic class.");
+                    }
+                    else
+                    {
+                        _logger?.Warn($"Failed to get full name for type '{type.Name}'");
+                    }
+                }
+            }
+        }
     }
 
     public ScriptFactory? LoadResource(string path)
     {
-        if (!File.Exists(path))
+        if (_types.TryGetValue(path, out var type))
         {
-            return null;
+            return new ScriptFactory(type);
         }
+        _logger?.Warn($"Failed to find script '{path}'");
         return null;
-
-        var code = File.ReadAllText(path);
-
-        var references = ReferenceAssemblies.Net60.ToList();
-        references.Add(MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location));
-
-        var tree = SyntaxFactory.ParseSyntaxTree(code.Trim());
-        var compiler = CSharpCompilation.Create("test.cs")
-            .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release))
-            .WithReferences(references)
-            .AddSyntaxTrees(tree);
-
-        using var stream = new MemoryStream();
-
-        var result = compiler.Emit(stream);
-        if (result.Success)
-        {
-            var assembly = Assembly.Load(stream.ToArray());
-            foreach (var type in assembly.GetTypes())
-            {
-                if (type.IsAssignableTo(typeof(BaseScript)))
-                {
-                    return new ScriptFactory(type);
-                }
-            }
-            _logger?.Error("Failed to find a class which implements BaseScript!");
-            return null;
-        }
-        else
-        {
-            _logger?.Log("Failed to compile!");
-            foreach (var error in result.Diagnostics)
-            {
-                _logger?.Error(error.ToString());
-            }
-            return null;
-        }
     }
 }

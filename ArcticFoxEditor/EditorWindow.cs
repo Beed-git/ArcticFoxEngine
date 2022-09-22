@@ -22,7 +22,9 @@ public class EditorWindow : IDisposable
     private GL _gl;
     private GraphicsDevice? _graphicsDevice;
 
-    private EditorImGuiPanels _editorImGui;
+    private ScenePanels _scenePanels;
+    private MainMenu _mainMenu;
+
     private ImGuiController _imGuiController;
     private IInputContext _inputContext;
 
@@ -81,7 +83,8 @@ public class EditorWindow : IDisposable
         _core.OnLoad();
         _core.OnResize(new Vector2i((int)_lastImguiImageSize.X, (int)_lastImguiImageSize.Y));
 
-        _editorImGui = new EditorImGuiPanels(_core);
+        _scenePanels = new ScenePanels(_core);
+        _mainMenu = new MainMenu(_core);
     }
 
     private void OnUpdate(double dt)
@@ -98,8 +101,11 @@ public class EditorWindow : IDisposable
 
         ImGui.DockSpaceOverViewport();
 
-        _editorImGui.DrawPropertiesPanel();
-        _editorImGui.DrawEntityPanel();
+        _mainMenu.Draw();
+        _scenePanels.DrawPropertiesPanel();
+        _scenePanels.DrawEntityPanel();
+
+        // ImGui.ShowDemoWindow();
 
         ImGui.Begin("Game");
         ImGui.BeginChild("GLContext");

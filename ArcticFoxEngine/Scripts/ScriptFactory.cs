@@ -4,7 +4,7 @@ namespace ArcticFoxEngine.Scripts;
 
 public class ScriptFactory
 {
-    private Type _type;
+    private readonly Type _type;
 
     public ScriptFactory(Type type)
     {

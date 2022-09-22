@@ -2,17 +2,15 @@
 using ArcticFoxEngine.EC;
 using ArcticFoxEngine.Math;
 using ImGuiNET;
-using Silk.NET.Core;
-using Silk.NET.Vulkan;
 
 namespace ArcticFoxEditor.EditorImGui;
 
-public class EditorImGuiPanels
+public class ScenePanels
 {
     private readonly Core _core;
     private readonly EnumerableListBox<Entity> _entities;
 
-    public EditorImGuiPanels(Core core)
+    public ScenePanels(Core core)
     {
         _core = core;
         _entities = new EnumerableListBox<Entity>();

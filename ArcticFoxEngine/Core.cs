@@ -9,6 +9,7 @@ using ArcticFoxEngine.Rendering.Textures;
 using ArcticFoxEngine.Resources;
 using ArcticFoxEngine.Scripts;
 using Silk.NET.OpenGL;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -21,7 +22,7 @@ public class Core
 
     private readonly ILogger? _logger;
 
-    private ProjectManager _projectManager;
+    private FileManager _projectManager;
     private ResourceManager _resourceManager;
     private SceneManager _sceneManager;
 
@@ -32,19 +33,26 @@ public class Core
     }
 
     public Scene? CurrentScene => _sceneManager?.CurrentScene;
+    public ResourceManager ResourceManager => _resourceManager;
 
     public void OnLoad()
     {
-        _projectManager = new ProjectManager("projects/project1");
+        _projectManager = new FileManager("projects/project1");
 
         _sceneManager = new SceneManager();
+
+        var assemblies = new List<Assembly>();
+        var files = Directory.GetFiles(_projectManager.ProjectDirectory, "*.dll");
+        foreach (var file in files)
+        {
+            assemblies.Add(Assembly.LoadFile(file));
+        }
 
         _resourceManager = new ResourceManagerBuilder(_projectManager)
             .WithLogger(_logger)
             .WithLoader(new TextureLoader(_graphicsDevice))
-            .WithLoader(new ScriptFactoryLoader(_logger))
+            .WithLoader(new ScriptFactoryLoader(_logger, assemblies))
             .Build();
-
 
         var serializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
