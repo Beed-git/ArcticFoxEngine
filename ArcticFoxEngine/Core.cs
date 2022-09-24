@@ -16,7 +16,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace ArcticFoxEngine;
 
-public class Core
+internal class Core
 {
     private readonly GraphicsDevice _graphicsDevice;
 
@@ -26,32 +26,26 @@ public class Core
     private ResourceManager _resourceManager;
     private SceneManager _sceneManager;
 
-    public Core(GraphicsDevice graphics, ILogger? logger = null)
+    private IEnumerable<Assembly> _assemblies;
+
+    public Core(GraphicsDevice graphics, IEnumerable<Assembly> scriptAssemblies, ILogger? logger = null)
     {
         _logger = logger;
         _graphicsDevice = graphics;
+        _assemblies = scriptAssemblies;
     }
 
-    public Scene? CurrentScene => _sceneManager?.CurrentScene;
-    public ResourceManager ResourceManager => _resourceManager;
+    private Scene? CurrentScene => _sceneManager?.CurrentScene;
 
     public void OnLoad()
     {
-        _projectManager = new FileManager("projects/project1");
-
+        _projectManager = new FileManager();
         _sceneManager = new SceneManager();
-
-        var assemblies = new List<Assembly>();
-        var files = Directory.GetFiles(_projectManager.ProjectDirectory, "*.dll");
-        foreach (var file in files)
-        {
-            assemblies.Add(Assembly.LoadFile(file));
-        }
 
         _resourceManager = new ResourceManagerBuilder(_projectManager)
             .WithLogger(_logger)
             .WithLoader(new TextureLoader(_graphicsDevice))
-            .WithLoader(new ScriptFactoryLoader(_logger, assemblies))
+            .WithLoader(new ScriptFactoryLoader(_logger, _assemblies))
             .Build();
 
         var serializer = new SerializerBuilder()

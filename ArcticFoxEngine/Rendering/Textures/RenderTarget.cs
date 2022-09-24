@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering.Textures;
 
-public class RenderTarget : IDisposable
+internal class RenderTarget : IDisposable
 {
     private readonly GL _gl;
 

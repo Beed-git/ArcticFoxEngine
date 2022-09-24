@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering;
 
-public class GraphicsDevice
+internal class GraphicsDevice
 {
     private readonly GL _gl;
 

@@ -4,7 +4,7 @@ namespace ArcticFoxEngine.Scripts;
 
 public abstract class BaseScript
 {
-    public BaseScript(Entity parent)
+    public BaseScript(IEntity parent)
     {
         Entity = parent;
     }

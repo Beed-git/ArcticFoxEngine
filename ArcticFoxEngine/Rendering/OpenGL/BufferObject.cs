@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ArcticFoxEngine.Rendering.OpenGL;
 
-public class BufferObject<T> : IDisposable where T : unmanaged
+internal class BufferObject<T> : IDisposable where T : unmanaged
 {
     private readonly GL _gl;
 

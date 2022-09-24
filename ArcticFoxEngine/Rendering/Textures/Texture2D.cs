@@ -3,7 +3,7 @@ using Silk.NET.OpenGL;
 
 namespace ArcticFoxEngine.Rendering.Textures;
 
-public class Texture2D : ITexture
+internal class Texture2D : ITexture
 {
     private readonly GL _gl;
 

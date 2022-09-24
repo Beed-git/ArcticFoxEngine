@@ -4,10 +4,11 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using SilkWindow = Silk.NET.Windowing.Window;
 using ArcticFoxEngine.Math;
+using System.Reflection;
 
 namespace ArcticFoxEngine.Rendering;
 
-public class GameWindow : IDisposable
+internal class GameWindow : IDisposable
 {
     private readonly IWindow _window;
     private Core? _core;
@@ -16,12 +17,22 @@ public class GameWindow : IDisposable
     private GraphicsDevice? _graphicsDevice;
 
     private IInputContext _inputContext;
+    private readonly IEnumerable<Assembly> _scriptAssemblies;
 
-    public GameWindow(WindowSettings settings)
+    public GameWindow(WindowSettings settings, IEnumerable<Assembly>? scriptAssemblies = null)
     {
         var options = WindowOptions.Default;
         options.Title = settings.Title;
         options.Size = new Vector2D<int>(settings.Size.x, settings.Size.y);
+
+        if (scriptAssemblies is null)
+        {
+            _scriptAssemblies = Enumerable.Empty<Assembly>();
+        }
+        else
+        {
+            _scriptAssemblies = scriptAssemblies;
+        }
 
         _window = SilkWindow.Create(options);
     }
@@ -52,7 +63,7 @@ public class GameWindow : IDisposable
 
         _inputContext = _window.CreateInput();
 
-        _core = new Core(_graphicsDevice);
+        _core = new Core(_graphicsDevice, _scriptAssemblies);
         _core.OnLoad();
         _core.OnResize(new Vector2i(_window.Size.X, _window.Size.Y));
     }

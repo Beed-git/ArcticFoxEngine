@@ -3,7 +3,7 @@ using StbImageSharp;
 
 namespace ArcticFoxEngine.Rendering.Textures;
 
-public class TextureLoader : IResourceLoader<Texture2D>
+internal class TextureLoader : IResourceLoader<Texture2D>
 {
     private readonly GraphicsDevice _graphicsDevice;
 

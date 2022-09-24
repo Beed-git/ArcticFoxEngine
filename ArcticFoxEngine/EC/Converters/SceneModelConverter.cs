@@ -6,7 +6,7 @@ using ArcticFoxEngine.Scripts;
 
 namespace ArcticFoxEngine.EC.Converters;
 
-public static class SceneModelConverter
+internal static class SceneModelConverter
 {
     private static EntityModel ToEntityModel(Entity entity)
     {

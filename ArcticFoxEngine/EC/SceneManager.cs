@@ -1,6 +1,6 @@
 ﻿namespace ArcticFoxEngine.EC;
 
-public class SceneManager
+internal class SceneManager
 {
     private Scene? _currentScene;
 

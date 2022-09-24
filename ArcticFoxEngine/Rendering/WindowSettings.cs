@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering;
 
-public struct WindowSettings
+internal struct WindowSettings
 {
     public string Title { get; set; }
     public Vector2i Size { get; set; }

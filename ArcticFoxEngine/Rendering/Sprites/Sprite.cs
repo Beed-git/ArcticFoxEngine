@@ -3,7 +3,7 @@ using ArcticFoxEngine.Rendering.Textures;
 
 namespace ArcticFoxEngine.Rendering.Sprites;
 
-public struct Sprite
+internal struct Sprite
 {
     public Texture2D Texture;
     public Rectangle Source;

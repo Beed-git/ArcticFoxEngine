@@ -3,7 +3,7 @@ using ArcticFoxEngine.Logging;
 
 namespace ArcticFoxEngine.Resources;
 
-public class ResourceManagerBuilder
+internal class ResourceManagerBuilder
 {
     private readonly Dictionary<Type, IResourceLoader> _loaders;
 

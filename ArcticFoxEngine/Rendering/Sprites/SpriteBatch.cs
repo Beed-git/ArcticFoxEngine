@@ -5,7 +5,7 @@ using ArcticFoxEngine.Rendering.Textures;
 
 namespace ArcticFoxEngine.Rendering.Sprites;
 
-public class SpriteBatch : IDisposable
+internal class SpriteBatch : IDisposable
 {
     private ICamera _camera;
     private readonly GraphicsDevice _graphicsDevice;

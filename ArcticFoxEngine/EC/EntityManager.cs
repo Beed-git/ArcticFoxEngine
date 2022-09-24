@@ -1,6 +1,6 @@
 ﻿namespace ArcticFoxEngine.EC;
 
-public class EntityManager
+internal class EntityManager
 {
     private int _pointer;
     private readonly Queue<int> _freeIds;

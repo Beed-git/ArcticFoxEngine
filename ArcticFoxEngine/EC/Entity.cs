@@ -3,7 +3,7 @@ using ArcticFoxEngine.Scripts;
 
 namespace ArcticFoxEngine.EC;
 
-public class Entity : IEntity
+internal class Entity : IEntity
 {
     private readonly HashSet<IComponentModel> _components;
     private readonly Dictionary<string, BaseScript> _scripts;

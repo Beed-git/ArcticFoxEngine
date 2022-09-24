@@ -2,11 +2,11 @@
 
 namespace ArcticFoxEngine.Resources;
 
-public interface IResourceStore : IDisposable
+internal interface IResourceStore : IDisposable
 {
 }
 
-public class ResourceStore<T> : IResourceStore, IDisposable where T : class
+internal class ResourceStore<T> : IResourceStore, IDisposable where T : class
 {
     private readonly FileManager _projectManager;
     private readonly ILogger? _logger;

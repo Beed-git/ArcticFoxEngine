@@ -1,10 +1,10 @@
 ﻿namespace ArcticFoxEngine.Resources;
 
-public interface IResourceLoader
+internal interface IResourceLoader
 {
 }
 
-public interface IResourceLoader<T> : IResourceLoader
+internal interface IResourceLoader<T> : IResourceLoader
 {
     public T? LoadResource(string path);
 }

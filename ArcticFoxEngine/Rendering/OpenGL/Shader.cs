@@ -4,7 +4,7 @@ using Silk.NET.OpenGL;
 
 namespace ArcticFoxEngine.Rendering.OpenGL;
 
-public class Shader : IDisposable
+internal class Shader : IDisposable
 {
     private readonly GL _gl;
 

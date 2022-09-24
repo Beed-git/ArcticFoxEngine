@@ -1,6 +1,6 @@
 ﻿namespace ArcticFoxEngine.EC.Models;
 
-public class EntityModel
+internal class EntityModel
 {
     public IEnumerable<IComponentModel> Components { get; set; }
     public IEnumerable<string> Scripts { get; set; }

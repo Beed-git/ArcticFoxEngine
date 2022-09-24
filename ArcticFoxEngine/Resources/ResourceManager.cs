@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Resources;
 
-public class ResourceManager : IDisposable
+internal class ResourceManager : IDisposable
 {
     private readonly FileManager _projectManager;
     private readonly ILogger? _logger;

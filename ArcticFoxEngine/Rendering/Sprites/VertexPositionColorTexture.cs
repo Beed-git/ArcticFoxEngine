@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering.Sprites;
 
-public struct VertexPositionColorTexture
+internal struct VertexPositionColorTexture
 {
     public Vector3 position;
     public Vector4 color;

@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.EC.Models;
 
-public class SceneModel
+internal class SceneModel
 {
     public string Name { get; set; }
     public string Camera { get; set; }

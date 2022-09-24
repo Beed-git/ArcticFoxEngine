@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Resources;
 
-public class FileManager
+internal class FileManager
 {
     public FileManager()
     {
@@ -23,10 +23,7 @@ public class FileManager
     private string CreateRelativeFolder(string relativeDirectory)
     {
         var path = Path.Combine(ProjectDirectory, relativeDirectory);
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
+        Directory.CreateDirectory(path);
         return path;
     }
 }

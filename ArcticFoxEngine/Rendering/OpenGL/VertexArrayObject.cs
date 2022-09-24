@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering.OpenGL;
 
-public class VertexArrayObject<TVertex, TIndex> : IDisposable
+internal class VertexArrayObject<TVertex, TIndex> : IDisposable
     where TVertex : unmanaged
     where TIndex : unmanaged
 {

@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace ArcticFoxEngine.Scripts;
 
-public class ScriptFactoryLoader  : IResourceLoader<ScriptFactory>
+internal class ScriptFactoryLoader  : IResourceLoader<ScriptFactory>
 {
     private readonly ILogger? _logger;
     private Dictionary<string, Type> _types;

@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering.Camera;
 
-public class Camera2D : ICamera
+internal class Camera2D : ICamera
 {
     private const float _nearPlane = 0.01f;
     private const float _farPlane = 100.0f;

@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering.Camera;
 
-public class DummyCamera : ICamera
+internal class DummyCamera : ICamera
 {
     public Matrix4x4 ViewMatrix => Matrix4x4.Identity;
 

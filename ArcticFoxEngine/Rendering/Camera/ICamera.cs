@@ -2,7 +2,7 @@
 
 namespace ArcticFoxEngine.Rendering.Camera;
 
-public interface ICamera
+internal interface ICamera
 {
     public Matrix4x4 ViewMatrix { get; }
     public Matrix4x4 ProjectionMatrix { get; }

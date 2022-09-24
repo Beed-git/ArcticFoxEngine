@@ -8,7 +8,7 @@ using ArcticFoxEngine.Resources;
 
 namespace ArcticFoxEngine.EC;
 
-public class Scene
+internal class Scene
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ResourceManager _resourceManager;
