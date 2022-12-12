@@ -1,15 +1,12 @@
 ﻿using ArcticFoxEngine.EC;
 using ArcticFoxEngine.EC.Components;
-using ArcticFoxEngine.EC.Converters;
-using ArcticFoxEngine.EC.Models;
 using ArcticFoxEngine.Logging;
 using ArcticFoxEngine.Math;
 using ArcticFoxEngine.Rendering;
-using ArcticFoxEngine.Rendering.Textures;
 using ArcticFoxEngine.Resources;
+using ArcticFoxEngine.Resources.Loaders;
 using ArcticFoxEngine.Scripts;
 using Silk.NET.OpenGL;
-using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -19,60 +16,109 @@ namespace ArcticFoxEngine;
 internal class Core
 {
     private readonly GraphicsDevice _graphicsDevice;
-
+    private readonly GameWindow _window;
     private readonly ILogger? _logger;
 
-    private FileManager _projectManager;
-    private ResourceManager _resourceManager;
-    private SceneManager _sceneManager;
+    private readonly FileManager _fileManager;
+    private readonly ResourceManager _resourceManager;
+    private readonly SceneManager _sceneManager;
 
-    private IEnumerable<Assembly> _assemblies;
+    private readonly ISerializer _serializer;
+    private readonly IDeserializer _deserializer;
 
-    public Core(GraphicsDevice graphics, IEnumerable<Assembly> scriptAssemblies, ILogger? logger = null)
+    private readonly List<Type> _scriptTypes;
+    private readonly StartupModel? _startupModel;
+
+    public Core(GameWindow window, GraphicsDevice graphics) : this(window, graphics, null)
     {
+    }
+
+    public Core(GameWindow window, GraphicsDevice graphics, ILogger? logger)
+    {
+        _window = window;
         _logger = logger;
         _graphicsDevice = graphics;
-        _assemblies = scriptAssemblies;
+
+        _fileManager = new FileManager();
+        _sceneManager = new SceneManager();
+        _resourceManager = new ResourceManager(_fileManager, _logger);
+
+        _scriptTypes = new List<Type>();
+
+        _serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .DisableAliases()
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            .WithTagMapping(new TagName("!sprite"), typeof(SpriteComponent))
+            .WithTagMapping(new TagName("!transform"), typeof(TransformComponent))
+            .WithTagMapping(new TagName("!tilemap"), typeof(TilemapComponent))
+            .Build();
+
+        _deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithTagMapping(new TagName("!sprite"), typeof(SpriteComponent))
+            .WithTagMapping(new TagName("!transform"), typeof(TransformComponent))
+            .WithTagMapping(new TagName("!tilemap"), typeof(TilemapComponent))
+            .Build();
+
+        var startup = Path.Combine(_fileManager.AssetFolder, "startup.yml");
+        if (File.Exists(startup))
+        {
+            var startupText = File.ReadAllText(startup);
+            _startupModel = _deserializer.Deserialize<StartupModel>(startupText);
+
+            if (_startupModel.Title is not null)
+            {
+                _window.Title = _startupModel.Title;
+            }
+        }
+        else
+        {
+            _startupModel = null;
+            _logger?.Warn("No startup.yml found.");
+        }
+    }
+
+    public Core WithScripts(IEnumerable<Type> types)
+    {
+        foreach (var type in types)
+        {
+            if (type.IsAssignableTo(typeof(BaseScript)) && !type.IsAbstract && !type.IsGenericType)
+            {
+                _scriptTypes.Add(type);
+            }
+            else if (type.IsGenericType)
+            {
+                _logger?.Warn($"Invalid script provided, script cannot be generic: {type.Name}");
+            }
+            else if (type.IsAbstract)
+            {
+                _logger?.Warn($"Invalid script provided, script cannot be abstract: {type.Name}");
+            }
+            else
+            {
+                _logger?.Warn($"Invalid script provided, script needs to implement {nameof(BaseScript)}: {type.Name}");
+            }
+        }
+        return this;
     }
 
     private Scene? CurrentScene => _sceneManager?.CurrentScene;
 
     public void OnLoad()
     {
-        _projectManager = new FileManager();
-        _sceneManager = new SceneManager();
+        _resourceManager.AddLoader(new SpriteSheetLoader(_deserializer))
+             .AddLoader(new ScriptFactoryLoader(_logger, _scriptTypes))
+             .AddLoader(new TextureLoader(_graphicsDevice))
+             .AddLoader(new SceneLoader(_resourceManager, _deserializer, _graphicsDevice));
 
-        _resourceManager = new ResourceManagerBuilder(_projectManager)
-            .WithLogger(_logger)
-            .WithLoader(new TextureLoader(_graphicsDevice))
-            .WithLoader(new ScriptFactoryLoader(_logger, _assemblies))
-            .Build();
-
-        var serializer = new SerializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .DisableAliases()
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
-            .WithTagMapping(new TagName("!sprite"), typeof(SpriteComponent))
-            .WithTagMapping(new TagName("!transform"), typeof(TransformComponent))
-            .Build();
-
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .WithTagMapping(new TagName("!sprite"), typeof(SpriteComponent))
-            .WithTagMapping(new TagName("!transform"), typeof(TransformComponent))
-            .Build();
-
-        var scenePath = Path.Combine(_projectManager.AssetFolder, "scene.yml");
-        if (File.Exists(scenePath))
+        if (_startupModel?.StartScene is not null)
         {
-            var sceneText = File.ReadAllText(scenePath);
-            var sceneModel = deserializer.Deserialize<SceneModel>(sceneText);
-
-            var scene = SceneModelConverter.ToScene(_graphicsDevice, _resourceManager, sceneModel);
-            _sceneManager.ChangeScene(scene);
-
-            var model = SceneModelConverter.ToModel(scene);
-            File.WriteAllText("out.yml", serializer.Serialize(model));
+            var scene = _resourceManager.GetResource<Scene>(_startupModel.StartScene);
+            if (scene.Data is not null)
+            {
+                _sceneManager.ChangeScene(scene.Data);
+            }
         }
     }
 
@@ -83,16 +129,17 @@ internal class Core
 
     public unsafe void OnRender(double dt)
     {
-        if (CurrentScene is not null)
-        {
-
-        }
         var backgroundColor = CurrentScene is null ? Color.SteelBlue : CurrentScene.BackgroundColor;
 
         _graphicsDevice.GL.ClearColor(backgroundColor);
         _graphicsDevice.GL.Clear(ClearBufferMask.ColorBufferBit);
 
+        _graphicsDevice.GL.Enable(EnableCap.Blend);
+        _graphicsDevice.GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
         _sceneManager.Render(dt);
+
+        _graphicsDevice.GL.Disable(EnableCap.Blend);
     }
 
     public void OnClose()

@@ -6,5 +6,5 @@ internal interface IResourceLoader
 
 internal interface IResourceLoader<T> : IResourceLoader
 {
-    public T? LoadResource(string path);
+    public T? LoadResource(FileManager fileManager, string path);
 }

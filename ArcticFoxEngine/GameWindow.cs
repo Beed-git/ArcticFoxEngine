@@ -4,37 +4,42 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using SilkWindow = Silk.NET.Windowing.Window;
 using ArcticFoxEngine.Math;
-using System.Reflection;
+using ArcticFoxEngine.Rendering;
 
-namespace ArcticFoxEngine.Rendering;
+namespace ArcticFoxEngine;
 
-internal class GameWindow : IDisposable
+public class GameWindow : IDisposable
 {
     private readonly IWindow _window;
+
     private Core? _core;
+    private IEnumerable<Type>? _scriptTypes;
 
     private GL _gl;
     private GraphicsDevice? _graphicsDevice;
 
     private IInputContext _inputContext;
-    private readonly IEnumerable<Assembly> _scriptAssemblies;
 
-    public GameWindow(WindowSettings settings, IEnumerable<Assembly>? scriptAssemblies = null)
+    public GameWindow(WindowSettings settings)
     {
         var options = WindowOptions.Default;
         options.Title = settings.Title;
         options.Size = new Vector2D<int>(settings.Size.x, settings.Size.y);
 
-        if (scriptAssemblies is null)
-        {
-            _scriptAssemblies = Enumerable.Empty<Assembly>();
-        }
-        else
-        {
-            _scriptAssemblies = scriptAssemblies;
-        }
-
         _window = SilkWindow.Create(options);
+        _scriptTypes = null;
+    }
+
+    public string Title
+    {
+        get => _window.Title;
+        set => _window.Title = value;
+    }
+
+    public GameWindow WithScripts(IEnumerable<Type> types)
+    {
+        _scriptTypes = types;
+        return this;
     }
 
     public void Run()
@@ -44,14 +49,6 @@ internal class GameWindow : IDisposable
         _window.Render += OnRender;
         _window.FramebufferResize += OnResize;
         _window.Closing += OnClose;
-
-        _window.FileDrop += (s) =>
-        {
-            foreach (var st in s)
-            {
-                Console.WriteLine("Dragged and dropped a file: " + st);
-            }
-        };
 
         _window.Run();
     }
@@ -63,7 +60,11 @@ internal class GameWindow : IDisposable
 
         _inputContext = _window.CreateInput();
 
-        _core = new Core(_graphicsDevice, _scriptAssemblies);
+        _core = new Core(this, _graphicsDevice);
+        if (_scriptTypes is not null)
+        { 
+            _core.WithScripts(_scriptTypes);
+        }
         _core.OnLoad();
         _core.OnResize(new Vector2i(_window.Size.X, _window.Size.Y));
     }

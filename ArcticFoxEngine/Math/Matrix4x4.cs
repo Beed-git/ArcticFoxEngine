@@ -56,6 +56,15 @@ public struct Matrix4x4
 
     public static Matrix4x4 Identity => new(Vector4.UnitX, Vector4.UnitY, Vector4.UnitZ, Vector4.UnitW);
 
+    public static Matrix4x4 CreateScale(float x, float y, float z)
+    {
+        return new Matrix4x4(
+            new Vector4(x, 0, 0, 0),
+            new Vector4(0, y, 0, 0),
+            new Vector4(0, 0, z, 0),
+            new Vector4(0, 0, 0, 1));
+    }
+
     public static Matrix4x4 LookAt(float eyeX, float eyeY, float eyeZ, float targetX, float targetY, float targetZ, float upX, float upY, float upZ)
     {
         var eye = new Vector3(eyeX, eyeY, eyeZ);
@@ -99,6 +108,26 @@ public struct Matrix4x4
         return FromSilkMatrix(ortho);
     }
 
+    public static Matrix4x4 Multiply(Matrix4x4 left, Matrix4x4 right)
+    {
+        return FromSilkMatrix(SM.Matrix4X4.Multiply(ToSilkMatrix(left), ToSilkMatrix(right)));
+    }
+
+    private static SM.Matrix4X4<float> ToSilkMatrix(Matrix4x4 mat)
+    {
+        return new SM.Matrix4X4<float>(
+            ToSilkVector4(mat.row0),
+            ToSilkVector4(mat.row1),
+            ToSilkVector4(mat.row2),
+            ToSilkVector4(mat.row3)
+            );
+    }
+
+    private static SM.Vector4D<float> ToSilkVector4(Vector4 vec)
+    {
+        return new SM.Vector4D<float>(vec.x, vec.y, vec.z, vec.w);
+    }
+
     private static Matrix4x4 FromSilkMatrix(SM.Matrix4X4<float> mat)
     {
         return new Matrix4x4(
@@ -111,6 +140,11 @@ public struct Matrix4x4
     private static Vector4 FromSilkVector4(SM.Vector4D<float> vec)
     {
         return new Vector4(vec.X, vec.Y, vec.Z, vec.W);
+    }
+
+    public static Matrix4x4 operator *(Matrix4x4 left, Matrix4x4 right)
+    {
+        return Multiply(left, right);
     }
 
     public override string ToString()

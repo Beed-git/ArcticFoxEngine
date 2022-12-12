@@ -8,16 +8,14 @@ internal interface IResourceStore : IDisposable
 
 internal class ResourceStore<T> : IResourceStore, IDisposable where T : class
 {
-    private readonly FileManager _projectManager;
-    private readonly ILogger? _logger;
-
+    private readonly FileManager _fileManager;
     private readonly IResourceLoader<T>? _loader;
+
     private readonly Dictionary<string, Resource<T>> _resources;
 
-    public ResourceStore(FileManager projectManager, ILogger? logger, IResourceLoader<T>? loader)
+    public ResourceStore(FileManager fileManager, IResourceLoader<T>? loader)
     {
-        _projectManager = projectManager;
-        _logger = logger;
+        _fileManager = fileManager;
         _loader = loader;
         _resources = new Dictionary<string, Resource<T>>();
     }
@@ -31,7 +29,7 @@ internal class ResourceStore<T> : IResourceStore, IDisposable where T : class
         resource = new Resource<T>(path);
         if (_loader is not null)
         {
-            resource.Data = _loader.LoadResource(Path.Combine(_projectManager.AssetFolder, path));
+            resource.Data = _loader.LoadResource(_fileManager, path);
         }
         _resources.Add(path, resource);
         return resource;

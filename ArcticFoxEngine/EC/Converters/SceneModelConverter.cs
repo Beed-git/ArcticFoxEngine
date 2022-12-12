@@ -46,10 +46,17 @@ internal static class SceneModelConverter
             entities.Add(ent.Name, model);
         }
 
+        var cameraParent = scene.MainCamera.Parent is null ? string.Empty : scene.MainCamera.Parent.Name;
+        var camera = new CameraModel()
+        {
+            Type = scene.MainCamera.GetType().Name,
+            Parent = cameraParent
+        };
+
         return new SceneModel()
         {
             Name = scene.Name,
-            Camera = scene.MainCamera.GetType().Name,
+            Camera = camera,
             BackgroundColor = scene.BackgroundColor,
             Entities = entities
         };
@@ -57,16 +64,19 @@ internal static class SceneModelConverter
 
     public static Scene ToScene(GraphicsDevice graphicsDevice, ResourceManager resourceManager, SceneModel model)
     {
+        var camera = GetCamera(model.Camera.Type);
+
         var scene = new Scene(graphicsDevice, resourceManager)
         {
             Name = model.Name,
-            MainCamera = GetCamera(model.Camera),
+            MainCamera = camera,
             BackgroundColor = model.BackgroundColor,
         };
 
         foreach (var (name, entModel) in model.Entities)
         {
             var ent = scene.CreateEntity(name);
+
             if (entModel.Components is not null)
             {
                 // Since components are just a set of fields/properties, the model maps to the actual component.
@@ -86,6 +96,11 @@ internal static class SceneModelConverter
                         ent.AddScript(script.Data.CreateScript(ent));
                     }
                 }
+            }
+
+            if (!string.IsNullOrEmpty(model.Camera.Parent) && model.Camera.Parent == name)
+            {
+                camera.Parent = ent;
             }
         }
 
